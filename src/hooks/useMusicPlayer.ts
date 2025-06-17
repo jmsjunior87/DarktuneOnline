@@ -24,13 +24,16 @@ export const useMusicPlayer = () => {
 
   useEffect(() => {
     const audio = new Audio();
+    audio.crossOrigin = 'anonymous';
     audioRef.current = audio;
 
     const handleLoadStart = () => {
+      console.log('Iniciando carregamento do áudio...');
       setPlayerState(prev => ({ ...prev, isLoading: true }));
     };
 
     const handleCanPlay = () => {
+      console.log('Áudio pode ser reproduzido, duração:', audio.duration);
       setPlayerState(prev => ({ 
         ...prev, 
         isLoading: false,
@@ -49,37 +52,57 @@ export const useMusicPlayer = () => {
       setPlayerState(prev => ({ ...prev, isPlaying: false }));
     };
 
+    const handleError = (e: Event) => {
+      console.error('Erro ao carregar áudio:', e);
+      setPlayerState(prev => ({ ...prev, isLoading: false, isPlaying: false }));
+    };
+
+    const handleLoadedData = () => {
+      console.log('Dados do áudio carregados');
+      setPlayerState(prev => ({ ...prev, isLoading: false }));
+    };
+
     audio.addEventListener('loadstart', handleLoadStart);
     audio.addEventListener('canplay', handleCanPlay);
+    audio.addEventListener('loadeddata', handleLoadedData);
     audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('error', handleError);
 
     return () => {
       audio.removeEventListener('loadstart', handleLoadStart);
       audio.removeEventListener('canplay', handleCanPlay);
+      audio.removeEventListener('loadeddata', handleLoadedData);
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('error', handleError);
       audio.pause();
     };
   }, []);
 
-  const playSong = (song: Song) => {
+  const playSong = async (song: Song) => {
     if (!audioRef.current) return;
 
     console.log('Reproduzindo música:', song.name);
     console.log('URL:', song.url);
 
-    if (playerState.currentSong?.id !== song.id) {
-      audioRef.current.src = song.url;
-      setPlayerState(prev => ({ 
-        ...prev, 
-        currentSong: song,
-        currentTime: 0 
-      }));
-    }
+    try {
+      if (playerState.currentSong?.id !== song.id) {
+        audioRef.current.src = song.url;
+        setPlayerState(prev => ({ 
+          ...prev, 
+          currentSong: song,
+          currentTime: 0,
+          isLoading: true
+        }));
+      }
 
-    audioRef.current.play();
-    setPlayerState(prev => ({ ...prev, isPlaying: true }));
+      await audioRef.current.play();
+      setPlayerState(prev => ({ ...prev, isPlaying: true }));
+    } catch (error) {
+      console.error('Erro ao reproduzir música:', error);
+      setPlayerState(prev => ({ ...prev, isPlaying: false, isLoading: false }));
+    }
   };
 
   const pauseSong = () => {

@@ -80,14 +80,17 @@ export class GoogleDriveService {
 
       for (const file of files) {
         if (this.isAudioFile(file.name)) {
+          // Usar a URL de streaming direto do Google Drive
+          const streamUrl = `https://drive.google.com/uc?export=download&id=${file.id}`;
+          console.log('Arquivo de áudio encontrado:', file.name, 'URL:', streamUrl);
+          
           songs.push({
             id: file.id,
             name: file.name,
-            url: `https://drive.google.com/uc?id=${file.id}`,
+            url: streamUrl,
             albumId: folder.id
           });
         } else if (this.isCoverFile(file.name)) {
-          // Usar a URL de visualização direta para imagens
           coverUrl = `https://drive.google.com/thumbnail?id=${file.id}&sz=w400-h400`;
           console.log('Capa encontrada para', folder.name, ':', coverUrl);
         }
