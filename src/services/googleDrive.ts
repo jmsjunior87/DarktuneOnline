@@ -24,8 +24,8 @@ export interface Song {
 export class GoogleDriveService {
   private static instance: GoogleDriveService;
   private baseUrl = 'https://www.googleapis.com/drive/v3';
-  private apiKey = 'SUA_API_KEY_AQUI'; // Você precisa substituir por sua chave de API
-  private driveId = 'SEU_DRIVE_ID_AQUI'; // ID da sua pasta Albums no Drive
+  private apiKey = 'AIzaSyD8zoU0KerJB_4cXBMpjbS_jNkxJnSjgNM';
+  private albumsFolderId = '10L4y3OqfXgMbC043uP0nKMHQ5iqMHj5b';
 
   static getInstance(): GoogleDriveService {
     if (!GoogleDriveService.instance) {
@@ -48,15 +48,8 @@ export class GoogleDriveService {
     return response.json();
   }
 
-  async findAlbumsFolder(): Promise<string | null> {
-    const query = "name='Albums' and mimeType='application/vnd.google-apps.folder' and trashed=false";
-    const response = await this.makeRequest(`/files?q=${encodeURIComponent(query)}`);
-    
-    return response.files.length > 0 ? response.files[0].id : null;
-  }
-
-  async getAlbumFolders(albumsFolderId: string): Promise<DriveFile[]> {
-    const query = `'${albumsFolderId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`;
+  async getAlbumFolders(): Promise<DriveFile[]> {
+    const query = `'${this.albumsFolderId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`;
     const response = await this.makeRequest(`/files?q=${encodeURIComponent(query)}`);
     
     return response.files;
@@ -70,16 +63,10 @@ export class GoogleDriveService {
   }
 
   async getAlbums(): Promise<Album[]> {
-    console.log('Buscando pasta Albums...');
-    const albumsFolderId = await this.findAlbumsFolder();
+    console.log('Carregando álbuns do Google Drive...');
+    console.log('Usando pasta Albums ID:', this.albumsFolderId);
     
-    if (!albumsFolderId) {
-      console.log('Pasta Albums não encontrada');
-      return [];
-    }
-
-    console.log('Pasta Albums encontrada:', albumsFolderId);
-    const albumFolders = await this.getAlbumFolders(albumsFolderId);
+    const albumFolders = await this.getAlbumFolders();
     console.log('Pastas de álbuns encontradas:', albumFolders.length);
 
     const albums: Album[] = [];
