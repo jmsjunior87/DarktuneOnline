@@ -87,7 +87,9 @@ export class GoogleDriveService {
             albumId: folder.id
           });
         } else if (this.isCoverFile(file.name)) {
-          coverUrl = `https://drive.google.com/uc?id=${file.id}`;
+          // Usar a URL de visualização direta para imagens
+          coverUrl = `https://drive.google.com/thumbnail?id=${file.id}&sz=w400-h400`;
+          console.log('Capa encontrada para', folder.name, ':', coverUrl);
         }
       }
 
