@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from 'react';
 import { GoogleDriveService, Album } from '@/services/googleDrive';
-import { GoogleAuthService } from '@/services/googleAuth';
 import { useToast } from '@/hooks/use-toast';
 
 export const useGoogleDrive = () => {
@@ -11,27 +10,20 @@ export const useGoogleDrive = () => {
   const { toast } = useToast();
 
   const driveService = GoogleDriveService.getInstance();
-  const authService = GoogleAuthService.getInstance();
 
   const loadAlbums = async () => {
-    const token = authService.getAccessToken();
-    if (!token) {
-      setError('Token de acesso não encontrado');
-      return;
-    }
-
     setIsLoading(true);
     setError(null);
 
     try {
       console.log('Carregando álbuns do Google Drive...');
-      const albumsData = await driveService.getAlbums(token);
+      const albumsData = await driveService.getAlbums();
       setAlbums(albumsData);
       
       if (albumsData.length === 0) {
         toast({
           title: "Nenhum álbum encontrado",
-          description: "Crie uma pasta 'Albums' no seu Google Drive com subpastas para cada álbum",
+          description: "Verifique se existe uma pasta 'Albums' com subpastas para cada álbum",
         });
       } else {
         console.log(`${albumsData.length} álbuns carregados com sucesso`);
@@ -51,9 +43,7 @@ export const useGoogleDrive = () => {
   };
 
   useEffect(() => {
-    if (authService.isSignedIn()) {
-      loadAlbums();
-    }
+    loadAlbums();
   }, []);
 
   return {

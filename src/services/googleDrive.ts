@@ -24,6 +24,8 @@ export interface Song {
 export class GoogleDriveService {
   private static instance: GoogleDriveService;
   private baseUrl = 'https://www.googleapis.com/drive/v3';
+  private apiKey = 'SUA_API_KEY_AQUI'; // Você precisa substituir por sua chave de API
+  private driveId = 'SEU_DRIVE_ID_AQUI'; // ID da sua pasta Albums no Drive
 
   static getInstance(): GoogleDriveService {
     if (!GoogleDriveService.instance) {
@@ -32,10 +34,9 @@ export class GoogleDriveService {
     return GoogleDriveService.instance;
   }
 
-  private async makeRequest(endpoint: string, token: string): Promise<any> {
-    const response = await fetch(`${this.baseUrl}${endpoint}`, {
+  private async makeRequest(endpoint: string): Promise<any> {
+    const response = await fetch(`${this.baseUrl}${endpoint}&key=${this.apiKey}`, {
       headers: {
-        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       }
     });
@@ -47,30 +48,30 @@ export class GoogleDriveService {
     return response.json();
   }
 
-  async findAlbumsFolder(token: string): Promise<string | null> {
-    const query = "name='Albums' and mimeType='application/vnd.google-apps.folder' and 'root' in parents and trashed=false";
-    const response = await this.makeRequest(`/files?q=${encodeURIComponent(query)}`, token);
+  async findAlbumsFolder(): Promise<string | null> {
+    const query = "name='Albums' and mimeType='application/vnd.google-apps.folder' and trashed=false";
+    const response = await this.makeRequest(`/files?q=${encodeURIComponent(query)}`);
     
     return response.files.length > 0 ? response.files[0].id : null;
   }
 
-  async getAlbumFolders(albumsFolderId: string, token: string): Promise<DriveFile[]> {
+  async getAlbumFolders(albumsFolderId: string): Promise<DriveFile[]> {
     const query = `'${albumsFolderId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`;
-    const response = await this.makeRequest(`/files?q=${encodeURIComponent(query)}`, token);
+    const response = await this.makeRequest(`/files?q=${encodeURIComponent(query)}`);
     
     return response.files;
   }
 
-  async getFilesInFolder(folderId: string, token: string): Promise<DriveFile[]> {
+  async getFilesInFolder(folderId: string): Promise<DriveFile[]> {
     const query = `'${folderId}' in parents and trashed=false`;
-    const response = await this.makeRequest(`/files?q=${encodeURIComponent(query)}&fields=files(id,name,mimeType,webContentLink)`, token);
+    const response = await this.makeRequest(`/files?q=${encodeURIComponent(query)}&fields=files(id,name,mimeType,webContentLink)`);
     
     return response.files;
   }
 
-  async getAlbums(token: string): Promise<Album[]> {
+  async getAlbums(): Promise<Album[]> {
     console.log('Buscando pasta Albums...');
-    const albumsFolderId = await this.findAlbumsFolder(token);
+    const albumsFolderId = await this.findAlbumsFolder();
     
     if (!albumsFolderId) {
       console.log('Pasta Albums não encontrada');
@@ -78,14 +79,14 @@ export class GoogleDriveService {
     }
 
     console.log('Pasta Albums encontrada:', albumsFolderId);
-    const albumFolders = await this.getAlbumFolders(albumsFolderId, token);
+    const albumFolders = await this.getAlbumFolders(albumsFolderId);
     console.log('Pastas de álbuns encontradas:', albumFolders.length);
 
     const albums: Album[] = [];
 
     for (const folder of albumFolders) {
       console.log('Processando álbum:', folder.name);
-      const files = await this.getFilesInFolder(folder.id, token);
+      const files = await this.getFilesInFolder(folder.id);
       
       const songs: Song[] = [];
       let coverUrl: string | undefined;
@@ -95,7 +96,7 @@ export class GoogleDriveService {
           songs.push({
             id: file.id,
             name: file.name,
-            url: file.webContentLink || '',
+            url: `https://drive.google.com/uc?id=${file.id}`,
             albumId: folder.id
           });
         } else if (this.isCoverFile(file.name)) {

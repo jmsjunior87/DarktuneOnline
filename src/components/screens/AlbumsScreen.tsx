@@ -1,44 +1,13 @@
 
-import { Music, LogIn } from 'lucide-react';
+import { Music } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { useGoogleAuth } from '@/hooks/useGoogleAuth';
 import { useGoogleDrive } from '@/hooks/useGoogleDrive';
 
 const AlbumsScreen = () => {
-  const { user, isSignedIn, signIn, isLoading: authLoading } = useGoogleAuth();
-  const { albums, isLoading: driveLoading, loadAlbums } = useGoogleDrive();
+  const { albums, isLoading, loadAlbums } = useGoogleDrive();
 
-  if (!isSignedIn) {
-    return (
-      <div className="p-4 h-full">
-        <div className="flex items-center gap-2 mb-6">
-          <Music className="w-6 h-6 text-red-500" />
-          <h2 className="text-xl font-semibold">Meus Albums</h2>
-        </div>
-        
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <Music className="w-16 h-16 mx-auto mb-4 text-gray-600" />
-            <p className="text-lg mb-4 text-gray-300">Conecte-se ao Google Drive</p>
-            <p className="text-sm text-gray-400 mb-6">
-              Faça login para acessar seus álbuns salvos no Google Drive
-            </p>
-            <Button 
-              onClick={signIn}
-              disabled={authLoading}
-              className="bg-red-600 hover:bg-red-700 text-white"
-            >
-              <LogIn className="w-4 h-4 mr-2" />
-              {authLoading ? 'Conectando...' : 'Conectar com Google'}
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (driveLoading) {
+  if (isLoading) {
     return (
       <div className="p-4 h-full">
         <div className="flex items-center gap-2 mb-6">
@@ -79,7 +48,7 @@ const AlbumsScreen = () => {
             <Music className="w-16 h-16 mx-auto mb-4 text-gray-600" />
             <p className="text-lg mb-2">Nenhum álbum encontrado</p>
             <p className="text-sm">
-              Crie uma pasta "Albums" no Google Drive com subpastas para cada álbum
+              Verifique se existe uma pasta "Albums" no Google Drive com subpastas para cada álbum
             </p>
           </div>
         </div>
