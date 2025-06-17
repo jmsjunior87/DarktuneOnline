@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Music } from 'lucide-react';
 import AlbumsScreen from '@/components/screens/AlbumsScreen';
@@ -8,6 +7,8 @@ import PlaylistsScreen from '@/components/screens/PlaylistsScreen';
 import SettingsScreen from '@/components/screens/SettingsScreen';
 import NavigationBar from '@/components/navigation/NavigationBar';
 import { Album } from '@/services/googleDrive';
+import MusicPlayerControls from '@/components/player/MusicPlayerControls';
+import { useMusicPlayerContext } from '@/contexts/MusicPlayerContext';
 
 const Index = () => {
   const [activeScreen, setActiveScreen] = useState('albums');
@@ -37,6 +38,8 @@ const Index = () => {
     setSelectedAlbum(null);
   };
 
+  const { playerState } = useMusicPlayerContext();
+
   return (
     <div className="h-screen bg-gray-900 text-white flex flex-col">
       {/* Header */}
@@ -47,10 +50,17 @@ const Index = () => {
         </div>
       </header>
 
-      {/* Main Content - flex-1 with overflow hidden */}
-      <main className="flex-1 overflow-hidden">
+      {/* Main Content - adjust for player */}
+      <main className={`flex-1 overflow-hidden ${playerState.currentSong ? 'pb-32' : ''}`}>
         {renderActiveScreen()}
       </main>
+
+      {/* Music Player Controls - conditionally rendered */}
+      {playerState.currentSong && (
+        <div className="fixed bottom-16 left-0 right-0">
+          <MusicPlayerControls />
+        </div>
+      )}
 
       {/* Navigation - fixed at bottom */}
       <div className="flex-shrink-0">

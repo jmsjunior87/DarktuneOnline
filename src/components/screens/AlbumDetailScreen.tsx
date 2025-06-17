@@ -1,8 +1,8 @@
-
 import { ArrowLeft, Play, Music } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Album } from '@/services/googleDrive';
+import { useMusicPlayerContext } from '@/contexts/MusicPlayerContext';
 
 interface AlbumDetailScreenProps {
   album: Album;
@@ -10,6 +10,18 @@ interface AlbumDetailScreenProps {
 }
 
 const AlbumDetailScreen = ({ album, onBack }: AlbumDetailScreenProps) => {
+  const { playSong, playerState } = useMusicPlayerContext();
+
+  const handlePlayAlbum = () => {
+    if (album.songs.length > 0) {
+      playSong(album.songs[0]);
+    }
+  };
+
+  const handlePlaySong = (song: typeof album.songs[0]) => {
+    playSong(song);
+  };
+
   return (
     <div className="h-full flex flex-col">
       {/* Header with back button */}
@@ -51,7 +63,10 @@ const AlbumDetailScreen = ({ album, onBack }: AlbumDetailScreenProps) => {
             <p className="text-gray-400 mb-4">
               {album.songs.length} música{album.songs.length !== 1 ? 's' : ''}
             </p>
-            <Button className="bg-red-500 hover:bg-red-600 text-white">
+            <Button 
+              onClick={handlePlayAlbum}
+              className="bg-red-500 hover:bg-red-600 text-white"
+            >
               <Play className="w-4 h-4 mr-2" />
               Reproduzir
             </Button>
@@ -61,14 +76,25 @@ const AlbumDetailScreen = ({ album, onBack }: AlbumDetailScreenProps) => {
         {/* Songs list */}
         <div className="space-y-2">
           {album.songs.map((song, index) => (
-            <Card key={song.id} className="bg-gray-800 border-gray-700 hover:bg-gray-750 transition-colors cursor-pointer">
+            <Card 
+              key={song.id} 
+              className={`bg-gray-800 border-gray-700 hover:bg-gray-750 transition-colors cursor-pointer ${
+                playerState.currentSong?.id === song.id ? 'bg-gray-750 border-red-500' : ''
+              }`}
+            >
               <CardContent className="p-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-sm text-gray-400">
-                    {index + 1}
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${
+                    playerState.currentSong?.id === song.id && playerState.isPlaying
+                      ? 'bg-red-500 text-white'
+                      : 'bg-gray-700 text-gray-400'
+                  }`}>
+                    {playerState.currentSong?.id === song.id && playerState.isPlaying ? '♪' : index + 1}
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-white text-sm font-medium">
+                    <h3 className={`text-sm font-medium ${
+                      playerState.currentSong?.id === song.id ? 'text-red-400' : 'text-white'
+                    }`}>
                       {song.name.replace(/\.(mp3|opus|m4a|flac|wav)$/i, '')}
                     </h3>
                   </div>
@@ -76,10 +102,7 @@ const AlbumDetailScreen = ({ album, onBack }: AlbumDetailScreenProps) => {
                     size="sm"
                     variant="ghost"
                     className="text-gray-400 hover:text-white"
-                    onClick={() => {
-                      console.log('Reproduzindo:', song.name);
-                      console.log('URL:', song.url);
-                    }}
+                    onClick={() => handlePlaySong(song)}
                   >
                     <Play className="w-4 h-4" />
                   </Button>
