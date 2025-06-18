@@ -1,5 +1,5 @@
 
-import { Play, Pause, Volume2, VolumeX } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { useMusicPlayerContext } from '@/contexts/MusicPlayerContext';
@@ -39,6 +39,12 @@ const MusicPlayerControls = () => {
           {playerState.isLoading && (
             <p className="text-xs text-gray-400">Carregando...</p>
           )}
+          {playerState.error && (
+            <div className="flex items-center gap-1 text-xs text-red-400">
+              <AlertCircle className="w-3 h-3" />
+              <span className="truncate">{playerState.error}</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -50,6 +56,7 @@ const MusicPlayerControls = () => {
           step={1}
           onValueChange={handleProgressChange}
           className="w-full"
+          disabled={playerState.error !== null}
         />
         <div className="flex justify-between text-xs text-gray-400">
           <span>{formatTime(playerState.currentTime)}</span>
@@ -61,8 +68,8 @@ const MusicPlayerControls = () => {
       <div className="flex items-center justify-between">
         <Button
           onClick={togglePlay}
-          disabled={playerState.isLoading}
-          className="bg-red-500 hover:bg-red-600 text-white"
+          disabled={playerState.isLoading || playerState.error !== null}
+          className="bg-red-500 hover:bg-red-600 text-white disabled:bg-gray-600"
         >
           {playerState.isPlaying ? (
             <Pause className="w-4 h-4" />

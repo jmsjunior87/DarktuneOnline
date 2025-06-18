@@ -62,17 +62,23 @@ export class GoogleDriveService {
     return response.files;
   }
 
+  // Método para obter URL de streaming usando diferentes abordagens
+  private getStreamingUrl(fileId: string): string {
+    // Usar a URL de visualização direta que funciona melhor para streaming
+    return `https://drive.google.com/uc?export=view&id=${fileId}`;
+  }
+
   async getAlbums(): Promise<Album[]> {
-    console.log('Carregando álbuns do Google Drive...');
-    console.log('Usando pasta Albums ID:', this.albumsFolderId);
+    console.log('🎵 Carregando álbuns do Google Drive...');
+    console.log('📁 Usando pasta Albums ID:', this.albumsFolderId);
     
     const albumFolders = await this.getAlbumFolders();
-    console.log('Pastas de álbuns encontradas:', albumFolders.length);
+    console.log('📂 Pastas de álbuns encontradas:', albumFolders.length);
 
     const albums: Album[] = [];
 
     for (const folder of albumFolders) {
-      console.log('Processando álbum:', folder.name);
+      console.log('🎼 Processando álbum:', folder.name);
       const files = await this.getFilesInFolder(folder.id);
       
       const songs: Song[] = [];
@@ -80,9 +86,9 @@ export class GoogleDriveService {
 
       for (const file of files) {
         if (this.isAudioFile(file.name)) {
-          // Tentar diferentes URLs para streaming do Google Drive
-          const streamUrl = `https://docs.google.com/uc?export=download&id=${file.id}`;
-          console.log('Arquivo de áudio encontrado:', file.name, 'URL:', streamUrl);
+          const streamUrl = this.getStreamingUrl(file.id);
+          console.log('🎵 Arquivo de áudio encontrado:', file.name);
+          console.log('🔗 URL de streaming:', streamUrl);
           
           songs.push({
             id: file.id,
@@ -92,7 +98,7 @@ export class GoogleDriveService {
           });
         } else if (this.isCoverFile(file.name)) {
           coverUrl = `https://drive.google.com/thumbnail?id=${file.id}&sz=w400-h400`;
-          console.log('Capa encontrada para', folder.name, ':', coverUrl);
+          console.log('🖼️ Capa encontrada para', folder.name, ':', coverUrl);
         }
       }
 
@@ -103,10 +109,11 @@ export class GoogleDriveService {
           coverUrl,
           songs
         });
+        console.log(`✅ Álbum "${folder.name}" adicionado com ${songs.length} música(s)`);
       }
     }
 
-    console.log('Álbuns processados:', albums.length);
+    console.log('🎉 Total de álbuns processados:', albums.length);
     return albums;
   }
 
