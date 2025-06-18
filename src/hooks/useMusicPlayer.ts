@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Song } from '@/services/googleDrive';
+import { GoogleDriveService } from '@/services/googleDrive';
 
 export interface PlayerState {
   currentSong: Song | null;
@@ -13,6 +14,9 @@ export interface PlayerState {
 
 export const useMusicPlayer = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const currentBlobUrlRef = useRef<string | null>(null);
+  const driveService = GoogleDriveService.getInstance();
+  
   const [playerState, setPlayerState] = useState<PlayerState>({
     currentSong: null,
     isPlaying: false,
@@ -22,6 +26,15 @@ export const useMusicPlayer = () => {
     isLoading: false,
     error: null,
   });
+
+  // Função para limpar URL do blob anterior
+  const cleanupBlobUrl = () => {
+    if (currentBlobUrlRef.current) {
+      console.log('🧹 Limpando URL do blob anterior:', currentBlobUrlRef.current);
+      URL.revokeObjectURL(currentBlobUrlRef.current);
+      currentBlobUrlRef.current = null;
+    }
+  };
 
   useEffect(() => {
     const audio = new Audio();
@@ -62,21 +75,22 @@ export const useMusicPlayer = () => {
       console.error('❌ Erro ao carregar áudio:', e);
       console.error('🔍 Código do erro:', errorCode);
       console.error('📝 Mensagem do erro:', errorMessage);
+      console.error('🔗 URL atual:', audio.src);
       
-      let userFriendlyError = 'Erro desconhecido ao carregar áudio';
+      let userFriendlyError = 'Erro ao carregar áudio';
       
       switch (errorCode) {
         case 1: // MEDIA_ERR_ABORTED
-          userFriendlyError = 'Carregamento do áudio foi cancelado';
+          userFriendlyError = 'Carregamento cancelado';
           break;
         case 2: // MEDIA_ERR_NETWORK
-          userFriendlyError = 'Erro de rede ao carregar áudio';
+          userFriendlyError = 'Erro de rede';
           break;
         case 3: // MEDIA_ERR_DECODE
-          userFriendlyError = 'Erro ao decodificar o arquivo de áudio';
+          userFriendlyError = 'Formato não suportado';
           break;
         case 4: // MEDIA_ERR_SRC_NOT_SUPPORTED
-          userFriendlyError = 'Formato de áudio não suportado ou fonte inacessível';
+          userFriendlyError = 'Arquivo inacessível ou corrompido';
           break;
       }
       
@@ -93,15 +107,8 @@ export const useMusicPlayer = () => {
     };
 
     const handleCanPlayThrough = () => {
-      console.log('🎯 Áudio completamente carregado e pronto para reprodução');
+      console.log('🎯 Áudio completamente carregado e pronto');
       setPlayerState(prev => ({ ...prev, isLoading: false, error: null }));
-    };
-
-    const handleProgress = () => {
-      if (audio.buffered.length > 0) {
-        const bufferedEnd = audio.buffered.end(audio.buffered.length - 1);
-        console.log('📈 Progresso do buffer:', Math.round((bufferedEnd / audio.duration) * 100) + '%');
-      }
     };
 
     audio.addEventListener('loadstart', handleLoadStart);
@@ -111,7 +118,6 @@ export const useMusicPlayer = () => {
     audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.addEventListener('ended', handleEnded);
     audio.addEventListener('error', handleError);
-    audio.addEventListener('progress', handleProgress);
 
     return () => {
       audio.removeEventListener('loadstart', handleLoadStart);
@@ -121,8 +127,8 @@ export const useMusicPlayer = () => {
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('ended', handleEnded);
       audio.removeEventListener('error', handleError);
-      audio.removeEventListener('progress', handleProgress);
       audio.pause();
+      cleanupBlobUrl();
     };
   }, []);
 
@@ -130,42 +136,47 @@ export const useMusicPlayer = () => {
     if (!audioRef.current) return;
 
     console.log('🎵 Tentando reproduzir música:', song.name);
-    console.log('🔗 URL:', song.url);
+    console.log('🆔 ID do arquivo:', song.id);
 
     try {
-      // Sempre resetar o estado de erro ao tentar uma nova música
-      setPlayerState(prev => ({ ...prev, error: null }));
+      setPlayerState(prev => ({ ...prev, error: null, isLoading: true }));
 
       if (playerState.currentSong?.id !== song.id) {
         console.log('🔄 Carregando nova música...');
         
-        // Pausar a música atual se estiver tocando
+        // Pausar e limpar áudio atual
         audioRef.current.pause();
+        cleanupBlobUrl();
+        
+        // Criar blob URL para o arquivo
+        console.log('🔄 Criando blob URL para o arquivo...');
+        const blobUrl = await driveService.createAudioBlob(song.id);
+        currentBlobUrlRef.current = blobUrl;
         
         // Definir nova fonte
-        audioRef.current.src = song.url;
+        audioRef.current.src = blobUrl;
         
         setPlayerState(prev => ({ 
           ...prev, 
           currentSong: song,
           currentTime: 0,
-          isLoading: true,
           error: null
         }));
         
-        // Aguardar um pouco para o arquivo começar a carregar
-        await new Promise(resolve => setTimeout(resolve, 500));
+        console.log('⏳ Aguardando carregamento do áudio...');
+        
+        // Aguardar um pouco para o arquivo carregar
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
 
       console.log('▶️ Tentando iniciar reprodução...');
       
-      // Tentar reproduzir
       const playPromise = audioRef.current.play();
       
       if (playPromise !== undefined) {
         await playPromise;
         console.log('✅ Reprodução iniciada com sucesso!');
-        setPlayerState(prev => ({ ...prev, isPlaying: true, error: null }));
+        setPlayerState(prev => ({ ...prev, isPlaying: true, isLoading: false, error: null }));
       }
       
     } catch (error) {
@@ -175,7 +186,7 @@ export const useMusicPlayer = () => {
         ...prev, 
         isPlaying: false, 
         isLoading: false,
-        error: `Erro de reprodução: ${errorMessage}`
+        error: `Falha na reprodução: ${errorMessage}`
       }));
     }
   };

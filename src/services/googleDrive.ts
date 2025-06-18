@@ -62,10 +62,45 @@ export class GoogleDriveService {
     return response.files;
   }
 
-  // Método para obter URL de streaming usando diferentes abordagens
+  // Novo método para obter URL de streaming que funciona melhor
   private getStreamingUrl(fileId: string): string {
-    // Usar a URL de visualização direta que funciona melhor para streaming
-    return `https://drive.google.com/uc?export=view&id=${fileId}`;
+    // Usar a URL de download direto com confirmação automática
+    return `https://drive.google.com/uc?export=download&id=${fileId}&confirm=t`;
+  }
+
+  // Método para criar um blob URL a partir do arquivo do Google Drive
+  async createAudioBlob(fileId: string): Promise<string> {
+    try {
+      console.log('🔄 Criando blob para arquivo:', fileId);
+      
+      const url = `https://drive.google.com/uc?export=download&id=${fileId}&confirm=t`;
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        mode: 'cors'
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erro HTTP: ${response.status}`);
+      }
+
+      const blob = await response.blob();
+      
+      if (blob.size === 0) {
+        throw new Error('Arquivo vazio recebido');
+      }
+
+      console.log('✅ Blob criado com sucesso, tamanho:', blob.size, 'bytes');
+      console.log('📝 Tipo MIME do blob:', blob.type);
+      
+      const blobUrl = URL.createObjectURL(blob);
+      console.log('🔗 URL do blob criada:', blobUrl);
+      
+      return blobUrl;
+    } catch (error) {
+      console.error('❌ Erro ao criar blob:', error);
+      throw error;
+    }
   }
 
   async getAlbums(): Promise<Album[]> {
