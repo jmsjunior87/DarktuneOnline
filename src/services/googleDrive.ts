@@ -62,47 +62,6 @@ export class GoogleDriveService {
     return response.files;
   }
 
-  // Novo método para obter URL de streaming que funciona melhor
-  private getStreamingUrl(fileId: string): string {
-    // Usar a URL de download direto com confirmação automática
-    return `https://drive.google.com/uc?export=download&id=${fileId}&confirm=t`;
-  }
-
-  // Método para criar um blob URL a partir do arquivo do Google Drive
-  async createAudioBlob(fileId: string): Promise<string> {
-    try {
-      console.log('🔄 Criando blob para arquivo:', fileId);
-      
-      const url = `https://drive.google.com/uc?export=download&id=${fileId}&confirm=t`;
-      
-      const response = await fetch(url, {
-        method: 'GET',
-        mode: 'cors'
-      });
-
-      if (!response.ok) {
-        throw new Error(`Erro HTTP: ${response.status}`);
-      }
-
-      const blob = await response.blob();
-      
-      if (blob.size === 0) {
-        throw new Error('Arquivo vazio recebido');
-      }
-
-      console.log('✅ Blob criado com sucesso, tamanho:', blob.size, 'bytes');
-      console.log('📝 Tipo MIME do blob:', blob.type);
-      
-      const blobUrl = URL.createObjectURL(blob);
-      console.log('🔗 URL do blob criada:', blobUrl);
-      
-      return blobUrl;
-    } catch (error) {
-      console.error('❌ Erro ao criar blob:', error);
-      throw error;
-    }
-  }
-
   async getAlbums(): Promise<Album[]> {
     console.log('🎵 Carregando álbuns do Google Drive...');
     console.log('📁 Usando pasta Albums ID:', this.albumsFolderId);
@@ -121,14 +80,12 @@ export class GoogleDriveService {
 
       for (const file of files) {
         if (this.isAudioFile(file.name)) {
-          const streamUrl = this.getStreamingUrl(file.id);
           console.log('🎵 Arquivo de áudio encontrado:', file.name);
-          console.log('🔗 URL de streaming:', streamUrl);
           
           songs.push({
             id: file.id,
             name: file.name,
-            url: streamUrl,
+            url: `https://drive.google.com/uc?export=download&id=${file.id}`,
             albumId: folder.id
           });
         } else if (this.isCoverFile(file.name)) {
@@ -153,7 +110,7 @@ export class GoogleDriveService {
   }
 
   private isAudioFile(filename: string): boolean {
-    const audioExtensions = ['.mp3', '.opus', '.m4a', '.flac', '.wav'];
+    const audioExtensions = ['.mp3', '.opus', '.m4a', '.flac', '.wav', '.ogg'];
     return audioExtensions.some(ext => filename.toLowerCase().endsWith(ext));
   }
 
