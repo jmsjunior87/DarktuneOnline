@@ -80,8 +80,8 @@ export class GoogleDriveService {
 
       for (const file of files) {
         if (this.isAudioFile(file.name)) {
-          // Usar a URL de streaming direto do Google Drive
-          const streamUrl = `https://drive.google.com/uc?export=download&id=${file.id}`;
+          // Tentar diferentes URLs para streaming do Google Drive
+          const streamUrl = `https://docs.google.com/uc?export=download&id=${file.id}`;
           console.log('Arquivo de áudio encontrado:', file.name, 'URL:', streamUrl);
           
           songs.push({
