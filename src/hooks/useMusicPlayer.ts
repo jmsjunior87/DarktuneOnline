@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Song } from '@/services/googleDrive';
 
@@ -67,7 +68,7 @@ export const useMusicPlayer = () => {
         ...prev, 
         isLoading: false, 
         isPlaying: false,
-        error: 'Erro ao carregar arquivo de áudio'
+        error: 'Não foi possível reproduzir este arquivo'
       }));
     };
 
@@ -116,47 +117,33 @@ export const useMusicPlayer = () => {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
 
-      // URLs para testar com proxies CORS
-      const proxiedUrls = [
-        `https://cors-anywhere.herokuapp.com/${song.url}`,
-        `https://api.allorigins.win/get?url=${encodeURIComponent(song.url)}`,
-        `https://corsproxy.io/?${encodeURIComponent(song.url)}`,
-        song.url.replace('uc?export=download', 'file/d').replace(/&id=(.+)/, '/$1/view'),
+      // Extrai o ID do arquivo do Google Drive
+      const fileIdMatch = song.url.match(/[?&]id=([^&]+)/);
+      const fileId = fileIdMatch ? fileIdMatch[1] : null;
+      
+      if (!fileId) {
+        throw new Error('ID do arquivo não encontrado na URL');
+      }
+
+      // URLs alternativas do Google Drive que podem funcionar melhor
+      const alternativeUrls = [
+        `https://drive.google.com/uc?export=download&id=${fileId}&confirm=t`,
+        `https://docs.google.com/uc?export=download&id=${fileId}`,
+        `https://drive.google.com/file/d/${fileId}/view?usp=sharing`,
+        `https://drive.google.com/uc?id=${fileId}&export=download`,
         song.url
       ];
 
-      console.log('🔗 Testando URLs com proxy CORS...');
+      console.log('🔗 Testando URLs alternativas...');
 
-      for (let i = 0; i < proxiedUrls.length; i++) {
-        const testUrl = proxiedUrls[i];
+      for (let i = 0; i < alternativeUrls.length; i++) {
+        const testUrl = alternativeUrls[i];
         console.log(`🧪 Testando URL ${i + 1}:`, testUrl);
         
         try {
           audioRef.current.src = testUrl;
           
-          // Aguarda um pouco para ver se carrega
-          await new Promise((resolve, reject) => {
-            const timeout = setTimeout(() => reject(new Error('Timeout')), 5000);
-            
-            const onLoad = () => {
-              clearTimeout(timeout);
-              audioRef.current?.removeEventListener('canplay', onLoad);
-              audioRef.current?.removeEventListener('error', onError);
-              resolve(true);
-            };
-            
-            const onError = () => {
-              clearTimeout(timeout);
-              audioRef.current?.removeEventListener('canplay', onLoad);
-              audioRef.current?.removeEventListener('error', onError);
-              reject(new Error('Falha no carregamento'));
-            };
-            
-            audioRef.current?.addEventListener('canplay', onLoad);
-            audioRef.current?.addEventListener('error', onError);
-          });
-          
-          // Se chegou aqui, o áudio carregou
+          // Tenta reproduzir diretamente
           const playPromise = audioRef.current.play();
           if (playPromise !== undefined) {
             await playPromise;
@@ -170,7 +157,7 @@ export const useMusicPlayer = () => {
         }
       }
 
-      throw new Error('Nenhuma URL funcionou - arquivos podem precisar de permissões públicas');
+      throw new Error('Nenhuma URL funcionou');
       
     } catch (error) {
       console.error('❌ Erro ao reproduzir:', error);
@@ -178,7 +165,7 @@ export const useMusicPlayer = () => {
         ...prev, 
         isPlaying: false, 
         isLoading: false,
-        error: 'Erro: Verifique se os arquivos estão públicos no Google Drive'
+        error: 'Os arquivos do Google Drive precisam ser públicos ou usar um serviço de hosting específico para áudio'
       }));
     }
   }, []);
