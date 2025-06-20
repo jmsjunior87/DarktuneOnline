@@ -50,6 +50,31 @@ export class GoogleDriveService {
     return response.json();
   }
 
+  // Nova função para obter URL de streaming válido
+  async getStreamingUrl(fileId: string): Promise<string> {
+    try {
+      console.log('🔗 Obtendo URL de streaming para arquivo:', fileId);
+      
+      // Tenta obter informações do arquivo incluindo o webContentLink
+      const response = await this.makeRequest(`/files/${fileId}?fields=id,name,webContentLink,size`);
+      
+      if (response.webContentLink) {
+        console.log('✅ URL de streaming obtida:', response.webContentLink);
+        return response.webContentLink;
+      }
+      
+      // Fallback para URL de visualização
+      const viewUrl = `https://drive.google.com/file/d/${fileId}/view?usp=sharing`;
+      console.log('⚠️ Usando URL de fallback:', viewUrl);
+      return viewUrl;
+      
+    } catch (error) {
+      console.error('❌ Erro ao obter URL de streaming:', error);
+      // Último fallback
+      return `https://drive.google.com/file/d/${fileId}/view?usp=sharing`;
+    }
+  }
+
   async getAlbumFolders(): Promise<DriveFile[]> {
     const query = `'${this.albumsFolderId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`;
     const response = await this.makeRequest(`/files?q=${encodeURIComponent(query)}`);
@@ -98,10 +123,11 @@ export class GoogleDriveService {
           const artist = this.extractArtistFromFilename(file.name);
           const cleanName = this.cleanSongName(file.name);
           
+          // Usar apenas o ID do arquivo - a URL será gerada quando necessário
           songs.push({
             id: file.id,
             name: cleanName || file.name,
-            url: `https://drive.google.com/file/d/${file.id}/view?usp=sharing`,
+            url: file.id, // Armazenar apenas o ID
             albumId: folder.id,
             albumName: folder.name,
             artist: artist
@@ -125,6 +151,15 @@ export class GoogleDriveService {
 
     console.log('🎉 Total de álbuns processados:', albums.length);
     return albums;
+  }
+
+  private extractArtistFromFilename(filename: string): string | undefined {
+    const match = filename.match(/^(.+?)\s*-\s*(.+)\.(mp3|opus|m4a|flac|wav|ogg)$/i);
+    return match ? match[1].trim() : undefined;
+  }
+
+  private cleanSongName(filename: string): string {
+    return filename.replace(/\.(mp3|opus|m4a|flac|wav|ogg)$/i, '').replace(/^.*?\s*-\s*/, '');
   }
 
   private isAudioFile(filename: string): boolean {

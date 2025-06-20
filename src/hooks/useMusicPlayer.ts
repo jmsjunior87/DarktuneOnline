@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Song } from '@/services/googleDrive';
+import { GoogleDriveService } from '@/services/googleDrive';
 
 export interface PlayerState {
   currentSong: Song | null;
@@ -13,6 +14,7 @@ export interface PlayerState {
 
 export const useMusicPlayer = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const driveService = GoogleDriveService.getInstance();
   
   const [playerState, setPlayerState] = useState<PlayerState>({
     currentSong: null,
@@ -101,7 +103,7 @@ export const useMusicPlayer = () => {
     }
 
     console.log('🎵 Reproduzindo:', song.name);
-    console.log('🔗 URL:', song.url);
+    console.log('📂 ID do arquivo:', song.url); // song.url agora contém apenas o ID
     
     try {
       setPlayerState(prev => ({ 
@@ -116,20 +118,16 @@ export const useMusicPlayer = () => {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
 
-      // Extrai o ID do arquivo do Google Drive
-      const fileIdMatch = song.url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-      const fileId = fileIdMatch ? fileIdMatch[1] : null;
-      
-      if (!fileId) {
-        throw new Error('ID do arquivo não encontrado na URL');
-      }
+      // Obtém a URL de streaming válida usando o serviço
+      const streamingUrl = await driveService.getStreamingUrl(song.url);
+      console.log('🔗 URL de streaming obtida:', streamingUrl);
 
-      // URLs alternativas do Google Drive para streaming de áudio
+      // URLs para tentar reproduzir
       const streamingUrls = [
-        `https://docs.google.com/uc?export=download&id=${fileId}`,
-        `https://drive.google.com/uc?export=download&id=${fileId}`,
-        `https://drive.google.com/uc?id=${fileId}&export=download`,
-        song.url
+        `https://docs.google.com/uc?export=download&id=${song.url}`,
+        `https://drive.google.com/uc?export=download&id=${song.url}`,
+        streamingUrl,
+        `https://drive.google.com/file/d/${song.url}/view?usp=sharing`
       ];
 
       console.log('🔗 Testando URLs de streaming...');
@@ -141,14 +139,31 @@ export const useMusicPlayer = () => {
         try {
           audioRef.current.src = testUrl;
           
-          // Tenta reproduzir diretamente
-          const playPromise = audioRef.current.play();
-          if (playPromise !== undefined) {
-            await playPromise;
-            console.log(`✅ Reprodução iniciada com URL ${i + 1}!`);
-            setPlayerState(prev => ({ ...prev, isPlaying: true, isLoading: false }));
-            return;
-          }
+          // Cria uma promise para timeout
+          const playPromise = new Promise((resolve, reject) => {
+            const timeout = setTimeout(() => {
+              reject(new Error('Timeout'));
+            }, 10000); // 10 segundos de timeout
+
+            audioRef.current!.addEventListener('canplay', () => {
+              clearTimeout(timeout);
+              resolve(audioRef.current!.play());
+            }, { once: true });
+
+            audioRef.current!.addEventListener('error', (e) => {
+              clearTimeout(timeout);
+              reject(e);
+            }, { once: true });
+
+            // Força o carregamento
+            audioRef.current!.load();
+          });
+
+          await playPromise;
+          console.log(`✅ Reprodução iniciada com URL ${i + 1}!`);
+          setPlayerState(prev => ({ ...prev, isPlaying: true, isLoading: false }));
+          return;
+          
         } catch (urlError) {
           console.log(`❌ Erro com URL ${i + 1}:`, urlError);
           continue;
@@ -163,10 +178,10 @@ export const useMusicPlayer = () => {
         ...prev, 
         isPlaying: false, 
         isLoading: false,
-        error: 'Não foi possível reproduzir este arquivo. Verifique se o arquivo está público no Google Drive.'
+        error: 'Arquivo não encontrado ou não está público no Google Drive'
       }));
     }
-  }, []);
+  }, [driveService]);
 
   const pauseSong = useCallback(() => {
     if (!audioRef.current) return;
