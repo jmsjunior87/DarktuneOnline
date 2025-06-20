@@ -5,7 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useGoogleDrive } from '@/hooks/useGoogleDrive';
+import { useSearch } from '@/hooks/useSearch';
 import { Album } from '@/services/googleDrive';
+import SearchResults from '@/components/search/SearchResults';
 
 interface AlbumsScreenProps {
   onAlbumSelect: (album: Album) => void;
@@ -13,11 +15,10 @@ interface AlbumsScreenProps {
 
 const AlbumsScreen = ({ onAlbumSelect }: AlbumsScreenProps) => {
   const { albums, isLoading, loadAlbums } = useGoogleDrive();
-  const [searchTerm, setSearchTerm] = useState('');
+  const { searchTerm, setSearchTerm, searchResults, hasResults } = useSearch(albums);
 
-  const filteredAlbums = albums.filter(album =>
-    album.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filtrar álbuns apenas se não houver busca ativa
+  const filteredAlbums = !searchTerm ? albums : [];
 
   if (isLoading) {
     return (
@@ -75,8 +76,12 @@ const AlbumsScreen = ({ onAlbumSelect }: AlbumsScreenProps) => {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Music className="w-6 h-6 text-red-500" />
-            <h2 className="text-xl font-semibold">Meus Albums</h2>
-            <span className="text-sm text-gray-400">({filteredAlbums.length})</span>
+            <h2 className="text-xl font-semibold">
+              {searchTerm ? 'Resultados da Busca' : 'Meus Albums'}
+            </h2>
+            <span className="text-sm text-gray-400">
+              ({searchTerm ? searchResults.length : filteredAlbums.length})
+            </span>
           </div>
           <Button 
             onClick={loadAlbums}
@@ -93,7 +98,7 @@ const AlbumsScreen = ({ onAlbumSelect }: AlbumsScreenProps) => {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
           <Input
             type="text"
-            placeholder="Buscar álbuns..."
+            placeholder="Buscar álbuns, músicas ou artistas..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10 pr-10 bg-gray-800 border-gray-600 text-white placeholder:text-gray-400 focus:border-red-500"
@@ -111,13 +116,10 @@ const AlbumsScreen = ({ onAlbumSelect }: AlbumsScreenProps) => {
         </div>
       </div>
 
-      {/* Albums grid */}
+      {/* Content */}
       <div className="flex-1 overflow-y-auto p-4">
-        {filteredAlbums.length === 0 ? (
-          <div className="text-center text-gray-400 mt-8">
-            <Search className="w-12 h-12 mx-auto mb-4 text-gray-600" />
-            <p>Nenhum álbum encontrado para "{searchTerm}"</p>
-          </div>
+        {searchTerm ? (
+          <SearchResults results={searchResults} onAlbumSelect={onAlbumSelect} />
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
             {filteredAlbums.map((album) => (

@@ -19,6 +19,8 @@ export interface Song {
   name: string;
   url: string;
   albumId: string;
+  albumName?: string;
+  artist?: string;
 }
 
 export class GoogleDriveService {
@@ -62,6 +64,17 @@ export class GoogleDriveService {
     return response.files;
   }
 
+  // Extrai artista do nome do arquivo (formato: "Artista - Música.ext")
+  private extractArtistFromFilename(filename: string): string | undefined {
+    const match = filename.match(/^(.+?)\s*-\s*(.+)\.(mp3|opus|m4a|flac|wav|ogg)$/i);
+    return match ? match[1].trim() : undefined;
+  }
+
+  // Remove extensão e formatação do nome da música
+  private cleanSongName(filename: string): string {
+    return filename.replace(/\.(mp3|opus|m4a|flac|wav|ogg)$/i, '').replace(/^.*?\s*-\s*/, '');
+  }
+
   async getAlbums(): Promise<Album[]> {
     console.log('🎵 Carregando álbuns do Google Drive...');
     console.log('📁 Usando pasta Albums ID:', this.albumsFolderId);
@@ -82,11 +95,16 @@ export class GoogleDriveService {
         if (this.isAudioFile(file.name)) {
           console.log('🎵 Arquivo de áudio encontrado:', file.name);
           
+          const artist = this.extractArtistFromFilename(file.name);
+          const cleanName = this.cleanSongName(file.name);
+          
           songs.push({
             id: file.id,
-            name: file.name,
-            url: `https://drive.google.com/uc?export=download&id=${file.id}`,
-            albumId: folder.id
+            name: cleanName || file.name,
+            url: `https://drive.google.com/file/d/${file.id}/view?usp=sharing`,
+            albumId: folder.id,
+            albumName: folder.name,
+            artist: artist
           });
         } else if (this.isCoverFile(file.name)) {
           coverUrl = `https://drive.google.com/thumbnail?id=${file.id}&sz=w400-h400`;

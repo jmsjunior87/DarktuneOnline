@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Song } from '@/services/googleDrive';
 
@@ -102,7 +101,7 @@ export const useMusicPlayer = () => {
     }
 
     console.log('🎵 Reproduzindo:', song.name);
-    console.log('🔗 URL original:', song.url);
+    console.log('🔗 URL:', song.url);
     
     try {
       setPlayerState(prev => ({ 
@@ -118,26 +117,25 @@ export const useMusicPlayer = () => {
       audioRef.current.currentTime = 0;
 
       // Extrai o ID do arquivo do Google Drive
-      const fileIdMatch = song.url.match(/[?&]id=([^&]+)/);
+      const fileIdMatch = song.url.match(/\/d\/([a-zA-Z0-9_-]+)/);
       const fileId = fileIdMatch ? fileIdMatch[1] : null;
       
       if (!fileId) {
         throw new Error('ID do arquivo não encontrado na URL');
       }
 
-      // URLs alternativas do Google Drive que podem funcionar melhor
-      const alternativeUrls = [
-        `https://drive.google.com/uc?export=download&id=${fileId}&confirm=t`,
+      // URLs alternativas do Google Drive para streaming de áudio
+      const streamingUrls = [
         `https://docs.google.com/uc?export=download&id=${fileId}`,
-        `https://drive.google.com/file/d/${fileId}/view?usp=sharing`,
+        `https://drive.google.com/uc?export=download&id=${fileId}`,
         `https://drive.google.com/uc?id=${fileId}&export=download`,
         song.url
       ];
 
-      console.log('🔗 Testando URLs alternativas...');
+      console.log('🔗 Testando URLs de streaming...');
 
-      for (let i = 0; i < alternativeUrls.length; i++) {
-        const testUrl = alternativeUrls[i];
+      for (let i = 0; i < streamingUrls.length; i++) {
+        const testUrl = streamingUrls[i];
         console.log(`🧪 Testando URL ${i + 1}:`, testUrl);
         
         try {
@@ -165,7 +163,7 @@ export const useMusicPlayer = () => {
         ...prev, 
         isPlaying: false, 
         isLoading: false,
-        error: 'Os arquivos do Google Drive precisam ser públicos ou usar um serviço de hosting específico para áudio'
+        error: 'Não foi possível reproduzir este arquivo. Verifique se o arquivo está público no Google Drive.'
       }));
     }
   }, []);
