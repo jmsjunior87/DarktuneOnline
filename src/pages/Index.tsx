@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Music } from 'lucide-react';
 import AlbumsScreen from '@/components/screens/AlbumsScreen';
@@ -11,6 +12,8 @@ import MusicPlayerControls from '@/components/player/MusicPlayerControls';
 import { useMusicPlayerContext } from '@/contexts/MusicPlayerContext';
 
 const Index = () => {
+  console.log('📱 Index component renderizando...');
+  
   const [activeScreen, setActiveScreen] = useState('albums');
   const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
 
@@ -38,7 +41,18 @@ const Index = () => {
     setSelectedAlbum(null);
   };
 
-  const { playerState } = useMusicPlayerContext();
+  // Tentar obter o contexto do player
+  let playerState;
+  try {
+    console.log('🎵 Tentando obter contexto do music player...');
+    const context = useMusicPlayerContext();
+    playerState = context.playerState;
+    console.log('✅ Contexto do music player obtido com sucesso');
+  } catch (error) {
+    console.error('❌ Erro ao obter contexto do music player:', error);
+    // Usar estado padrão se o contexto não estiver disponível
+    playerState = { currentSong: null };
+  }
 
   return (
     <div className="h-screen bg-gray-900 text-white flex flex-col">
