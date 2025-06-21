@@ -1,4 +1,3 @@
-
 export interface DriveFile {
   id: string;
   name: string;
@@ -50,19 +49,14 @@ export class GoogleDriveService {
     return response.json();
   }
 
-  // Função corrigida para obter URL de streaming válido
+  // Função atualizada para usar URL de streaming que funciona com CORS
   async getStreamingUrl(fileId: string): Promise<string> {
     console.log('🔗 Obtendo URL de streaming para arquivo:', fileId);
     
-    // URLs funcionais para streaming do Google Drive
-    const streamingUrls = [
-      `https://drive.google.com/uc?export=download&id=${fileId}`,
-      `https://docs.google.com/uc?export=download&id=${fileId}`,
-      `https://drive.google.com/file/d/${fileId}/view?usp=sharing`
-    ];
-
-    // Retorna a primeira URL (mais confiável para download direto)
-    const streamingUrl = streamingUrls[0];
+    // URL otimizada para streaming direto sem problemas de CORS
+    // Esta URL força o Google Drive a servir o arquivo diretamente
+    const streamingUrl = `https://docs.google.com/uc?export=download&id=${fileId}&confirm=t`;
+    
     console.log('✅ URL de streaming gerada:', streamingUrl);
     return streamingUrl;
   }

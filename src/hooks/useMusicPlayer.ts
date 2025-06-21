@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Song } from '@/services/googleDrive';
 import { GoogleDriveService } from '@/services/googleDrive';
@@ -70,7 +69,7 @@ export const useMusicPlayer = () => {
         ...prev, 
         isLoading: false, 
         isPlaying: false,
-        error: 'Não foi possível reproduzir este arquivo'
+        error: 'Erro ao carregar arquivo. Verifique se o arquivo está público no Google Drive.'
       }));
     };
 
@@ -119,17 +118,35 @@ export const useMusicPlayer = () => {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
 
-      // Obtém a URL de streaming direta
-      const streamingUrl = await driveService.getStreamingUrl(song.url);
-      console.log('🔗 URL de streaming:', streamingUrl);
+      // Obtém múltiplas URLs de streaming como fallback
+      const streamingUrls = [
+        `https://docs.google.com/uc?export=download&id=${song.url}&confirm=t`,
+        `https://drive.google.com/uc?export=download&id=${song.url}&confirm=t`,
+        `https://drive.google.com/file/d/${song.url}/view?usp=sharing`
+      ];
 
-      // Define a URL no elemento de áudio
-      audioRef.current.src = streamingUrl;
-      
-      // Tenta reproduzir
-      await audioRef.current.play();
-      console.log('✅ Reprodução iniciada!');
-      setPlayerState(prev => ({ ...prev, isPlaying: true, isLoading: false }));
+      let playbackSuccessful = false;
+
+      // Tenta cada URL até uma funcionar
+      for (const url of streamingUrls) {
+        try {
+          console.log('🔗 Tentando URL de streaming:', url);
+          audioRef.current.src = url;
+          
+          await audioRef.current.play();
+          console.log('✅ Reprodução iniciada com sucesso!');
+          setPlayerState(prev => ({ ...prev, isPlaying: true, isLoading: false }));
+          playbackSuccessful = true;
+          break;
+        } catch (urlError) {
+          console.log('⚠️ Falha com esta URL, tentando próxima...');
+          continue;
+        }
+      }
+
+      if (!playbackSuccessful) {
+        throw new Error('Nenhuma URL de streaming funcionou');
+      }
       
     } catch (error) {
       console.error('❌ Erro ao reproduzir:', error);
@@ -137,7 +154,7 @@ export const useMusicPlayer = () => {
         ...prev, 
         isPlaying: false, 
         isLoading: false,
-        error: 'Arquivo não encontrado ou não está público no Google Drive'
+        error: 'Verifique se o arquivo está público no Google Drive e tente novamente'
       }));
     }
   }, [driveService]);
