@@ -49,15 +49,15 @@ export class GoogleDriveService {
     return response.json();
   }
 
-  // Função atualizada para usar URL de streaming que funciona com CORS
+  // Nova função que usa proxy CORS para contornar limitações do Google Drive
   async getStreamingUrl(fileId: string): Promise<string> {
     console.log('🔗 Obtendo URL de streaming para arquivo:', fileId);
     
-    // URL otimizada para streaming direto sem problemas de CORS
-    // Esta URL força o Google Drive a servir o arquivo diretamente
-    const streamingUrl = `https://docs.google.com/uc?export=download&id=${fileId}&confirm=t`;
+    // Usando proxy CORS gratuito para contornar restrições do Google Drive
+    const driveUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
+    const streamingUrl = `https://cors-anywhere.herokuapp.com/${driveUrl}`;
     
-    console.log('✅ URL de streaming gerada:', streamingUrl);
+    console.log('✅ URL de streaming com proxy gerada:', streamingUrl);
     return streamingUrl;
   }
 
