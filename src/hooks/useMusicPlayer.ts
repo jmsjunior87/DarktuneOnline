@@ -16,6 +16,7 @@ export interface PlayerState {
 export const useMusicPlayer = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const driveService = GoogleDriveService.getInstance();
+  const currentBlobUrlRef = useRef<string | null>(null);
   
   const [playerState, setPlayerState] = useState<PlayerState>({
     currentSong: null,
@@ -31,7 +32,6 @@ export const useMusicPlayer = () => {
   useEffect(() => {
     const audio = new Audio();
     audio.preload = 'metadata';
-    audio.crossOrigin = 'anonymous';
     audioRef.current = audio;
 
     const handleLoadedMetadata = () => {
@@ -70,7 +70,7 @@ export const useMusicPlayer = () => {
         ...prev, 
         isLoading: false, 
         isPlaying: false,
-        error: 'Erro ao carregar arquivo. Verifique se o arquivo está público no Google Drive.'
+        error: 'Erro ao reproduzir arquivo de áudio.'
       }));
     };
 
@@ -94,6 +94,11 @@ export const useMusicPlayer = () => {
       audio.removeEventListener('error', handleError);
       audio.removeEventListener('loadstart', handleLoadStart);
       audio.pause();
+      
+      // Limpa blob URL se existir
+      if (currentBlobUrlRef.current) {
+        URL.revokeObjectURL(currentBlobUrlRef.current);
+      }
     };
   }, []);
 
@@ -119,63 +124,48 @@ export const useMusicPlayer = () => {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
 
-      // URLs alternativas para tentar streaming
-      const streamingUrls = [
-        // Proxy CORS para contornar restrições
-        `https://cors-anywhere.herokuapp.com/https://drive.google.com/uc?export=download&id=${song.url}`,
-        // URL direta sem proxy (pode funcionar em alguns casos)
-        `https://docs.google.com/uc?export=download&id=${song.url}&confirm=t`,
-        // URL alternativa
-        `https://drive.google.com/uc?id=${song.url}&export=download`
-      ];
-
-      let playbackSuccessful = false;
-
-      // Tenta cada URL até uma funcionar
-      for (const url of streamingUrls) {
-        try {
-          console.log('🔗 Tentando URL de streaming:', url);
-          audioRef.current.src = url;
-          
-          // Aguarda o carregamento dos metadados antes de tentar reproduzir
-          await new Promise((resolve, reject) => {
-            const handleCanPlay = () => {
-              audioRef.current?.removeEventListener('canplay', handleCanPlay);
-              audioRef.current?.removeEventListener('error', handleError);
-              resolve(true);
-            };
-            
-            const handleError = () => {
-              audioRef.current?.removeEventListener('canplay', handleCanPlay);
-              audioRef.current?.removeEventListener('error', handleError);
-              reject(new Error('Erro ao carregar'));
-            };
-            
-            audioRef.current?.addEventListener('canplay', handleCanPlay);
-            audioRef.current?.addEventListener('error', handleError);
-            
-            // Timeout de 10 segundos
-            setTimeout(() => {
-              audioRef.current?.removeEventListener('canplay', handleCanPlay);
-              audioRef.current?.removeEventListener('error', handleError);
-              reject(new Error('Timeout'));
-            }, 10000);
-          });
-          
-          await audioRef.current.play();
-          console.log('✅ Reprodução iniciada com sucesso!');
-          setPlayerState(prev => ({ ...prev, isPlaying: true, isLoading: false }));
-          playbackSuccessful = true;
-          break;
-        } catch (urlError) {
-          console.log('⚠️ Falha com esta URL, tentando próxima...', urlError);
-          continue;
-        }
+      // Limpa blob URL anterior se existir
+      if (currentBlobUrlRef.current) {
+        URL.revokeObjectURL(currentBlobUrlRef.current);
+        currentBlobUrlRef.current = null;
       }
 
-      if (!playbackSuccessful) {
-        throw new Error('Todas as URLs de streaming falharam');
-      }
+      // Baixa o arquivo e cria blob URL local
+      console.log('📥 Iniciando download do arquivo...');
+      const blobUrl = await driveService.downloadFileAsBlob(song.url);
+      currentBlobUrlRef.current = blobUrl;
+      
+      console.log('🔗 Usando URL local:', blobUrl);
+      audioRef.current.src = blobUrl;
+      
+      // Aguarda o carregamento dos metadados
+      await new Promise((resolve, reject) => {
+        const handleCanPlay = () => {
+          audioRef.current?.removeEventListener('canplay', handleCanPlay);
+          audioRef.current?.removeEventListener('error', handleError);
+          resolve(true);
+        };
+        
+        const handleError = () => {
+          audioRef.current?.removeEventListener('canplay', handleCanPlay);
+          audioRef.current?.removeEventListener('error', handleError);
+          reject(new Error('Erro ao carregar arquivo local'));
+        };
+        
+        audioRef.current?.addEventListener('canplay', handleCanPlay);
+        audioRef.current?.addEventListener('error', handleError);
+        
+        // Timeout de 15 segundos para download
+        setTimeout(() => {
+          audioRef.current?.removeEventListener('canplay', handleCanPlay);
+          audioRef.current?.removeEventListener('error', handleError);
+          reject(new Error('Timeout no carregamento'));
+        }, 15000);
+      });
+      
+      await audioRef.current.play();
+      console.log('✅ Reprodução iniciada com sucesso!');
+      setPlayerState(prev => ({ ...prev, isPlaying: true, isLoading: false }));
       
     } catch (error) {
       console.error('❌ Erro ao reproduzir:', error);
@@ -183,7 +173,7 @@ export const useMusicPlayer = () => {
         ...prev, 
         isPlaying: false, 
         isLoading: false,
-        error: 'Não foi possível reproduzir este arquivo. Tente novamente ou verifique se o arquivo está acessível.'
+        error: 'Não foi possível baixar ou reproduzir este arquivo. Verifique se o arquivo está acessível no Google Drive.'
       }));
     }
   }, [driveService]);
