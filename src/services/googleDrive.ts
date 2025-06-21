@@ -123,7 +123,7 @@ export class GoogleDriveService {
           const artist = this.extractArtistFromFilename(file.name);
           const cleanName = this.cleanSongName(file.name);
           
-          // Usar apenas o ID do arquivo - a URL será gerada quando necessário
+          // Armazenar apenas o ID do arquivo - a URL será gerada quando necessário
           songs.push({
             id: file.id,
             name: cleanName || file.name,
@@ -151,15 +151,6 @@ export class GoogleDriveService {
 
     console.log('🎉 Total de álbuns processados:', albums.length);
     return albums;
-  }
-
-  private extractArtistFromFilename(filename: string): string | undefined {
-    const match = filename.match(/^(.+?)\s*-\s*(.+)\.(mp3|opus|m4a|flac|wav|ogg)$/i);
-    return match ? match[1].trim() : undefined;
-  }
-
-  private cleanSongName(filename: string): string {
-    return filename.replace(/\.(mp3|opus|m4a|flac|wav|ogg)$/i, '').replace(/^.*?\s*-\s*/, '');
   }
 
   private isAudioFile(filename: string): boolean {
