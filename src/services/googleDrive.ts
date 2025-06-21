@@ -50,29 +50,21 @@ export class GoogleDriveService {
     return response.json();
   }
 
-  // Nova função para obter URL de streaming válido
+  // Função corrigida para obter URL de streaming válido
   async getStreamingUrl(fileId: string): Promise<string> {
-    try {
-      console.log('🔗 Obtendo URL de streaming para arquivo:', fileId);
-      
-      // Tenta obter informações do arquivo incluindo o webContentLink
-      const response = await this.makeRequest(`/files/${fileId}?fields=id,name,webContentLink,size`);
-      
-      if (response.webContentLink) {
-        console.log('✅ URL de streaming obtida:', response.webContentLink);
-        return response.webContentLink;
-      }
-      
-      // Fallback para URL de visualização
-      const viewUrl = `https://drive.google.com/file/d/${fileId}/view?usp=sharing`;
-      console.log('⚠️ Usando URL de fallback:', viewUrl);
-      return viewUrl;
-      
-    } catch (error) {
-      console.error('❌ Erro ao obter URL de streaming:', error);
-      // Último fallback
-      return `https://drive.google.com/file/d/${fileId}/view?usp=sharing`;
-    }
+    console.log('🔗 Obtendo URL de streaming para arquivo:', fileId);
+    
+    // URLs funcionais para streaming do Google Drive
+    const streamingUrls = [
+      `https://drive.google.com/uc?export=download&id=${fileId}`,
+      `https://docs.google.com/uc?export=download&id=${fileId}`,
+      `https://drive.google.com/file/d/${fileId}/view?usp=sharing`
+    ];
+
+    // Retorna a primeira URL (mais confiável para download direto)
+    const streamingUrl = streamingUrls[0];
+    console.log('✅ URL de streaming gerada:', streamingUrl);
+    return streamingUrl;
   }
 
   async getAlbumFolders(): Promise<DriveFile[]> {

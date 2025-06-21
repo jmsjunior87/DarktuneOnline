@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Song } from '@/services/googleDrive';
 import { GoogleDriveService } from '@/services/googleDrive';
@@ -29,7 +30,7 @@ export const useMusicPlayer = () => {
   // Initialize audio element
   useEffect(() => {
     const audio = new Audio();
-    audio.preload = 'none';
+    audio.preload = 'metadata';
     audio.crossOrigin = 'anonymous';
     audioRef.current = audio;
 
@@ -103,7 +104,7 @@ export const useMusicPlayer = () => {
     }
 
     console.log('🎵 Reproduzindo:', song.name);
-    console.log('📂 ID do arquivo:', song.url); // song.url agora contém apenas o ID
+    console.log('📂 ID do arquivo:', song.url);
     
     try {
       setPlayerState(prev => ({ 
@@ -118,59 +119,17 @@ export const useMusicPlayer = () => {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
 
-      // Obtém a URL de streaming válida usando o serviço
+      // Obtém a URL de streaming direta
       const streamingUrl = await driveService.getStreamingUrl(song.url);
-      console.log('🔗 URL de streaming obtida:', streamingUrl);
+      console.log('🔗 URL de streaming:', streamingUrl);
 
-      // URLs para tentar reproduzir
-      const streamingUrls = [
-        `https://docs.google.com/uc?export=download&id=${song.url}`,
-        `https://drive.google.com/uc?export=download&id=${song.url}`,
-        streamingUrl,
-        `https://drive.google.com/file/d/${song.url}/view?usp=sharing`
-      ];
-
-      console.log('🔗 Testando URLs de streaming...');
-
-      for (let i = 0; i < streamingUrls.length; i++) {
-        const testUrl = streamingUrls[i];
-        console.log(`🧪 Testando URL ${i + 1}:`, testUrl);
-        
-        try {
-          audioRef.current.src = testUrl;
-          
-          // Cria uma promise para timeout
-          const playPromise = new Promise((resolve, reject) => {
-            const timeout = setTimeout(() => {
-              reject(new Error('Timeout'));
-            }, 10000); // 10 segundos de timeout
-
-            audioRef.current!.addEventListener('canplay', () => {
-              clearTimeout(timeout);
-              resolve(audioRef.current!.play());
-            }, { once: true });
-
-            audioRef.current!.addEventListener('error', (e) => {
-              clearTimeout(timeout);
-              reject(e);
-            }, { once: true });
-
-            // Força o carregamento
-            audioRef.current!.load();
-          });
-
-          await playPromise;
-          console.log(`✅ Reprodução iniciada com URL ${i + 1}!`);
-          setPlayerState(prev => ({ ...prev, isPlaying: true, isLoading: false }));
-          return;
-          
-        } catch (urlError) {
-          console.log(`❌ Erro com URL ${i + 1}:`, urlError);
-          continue;
-        }
-      }
-
-      throw new Error('Nenhuma URL funcionou');
+      // Define a URL no elemento de áudio
+      audioRef.current.src = streamingUrl;
+      
+      // Tenta reproduzir
+      await audioRef.current.play();
+      console.log('✅ Reprodução iniciada!');
+      setPlayerState(prev => ({ ...prev, isPlaying: true, isLoading: false }));
       
     } catch (error) {
       console.error('❌ Erro ao reproduzir:', error);
