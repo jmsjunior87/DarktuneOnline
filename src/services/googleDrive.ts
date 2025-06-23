@@ -125,7 +125,7 @@ export class GoogleDriveService {
 
       console.log('📄 Baixando index.json:', indexFile.id);
       
-      // Usar o mesmo sistema de download que funciona para os arquivos de áudio
+      // Usar o mesmo sistema de download via blob que funciona para os arquivos de áudio
       const downloadUrls = [
         `https://www.googleapis.com/drive/v3/files/${indexFile.id}?alt=media&key=${this.apiKey}`,
         `https://drive.google.com/uc?export=download&id=${indexFile.id}`,
@@ -136,12 +136,16 @@ export class GoogleDriveService {
           console.log('🔗 Tentando baixar index.json de:', url);
           
           const response = await fetch(url, {
-            method: 'GET'
+            method: 'GET',
+            headers: {
+              'Range': 'bytes=0-'
+            }
           });
 
           if (response.ok) {
-            const jsonContent = await response.text();
-            const trackInfos: TrackInfo[] = JSON.parse(jsonContent);
+            const blob = await response.blob();
+            const text = await blob.text();
+            const trackInfos: TrackInfo[] = JSON.parse(text);
             console.log('✅ Index.json carregado com', trackInfos.length, 'faixas');
             return trackInfos;
           }
