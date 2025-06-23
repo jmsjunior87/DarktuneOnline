@@ -1,3 +1,4 @@
+
 import { ArrowLeft, Play, Music } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -14,12 +15,12 @@ const AlbumDetailScreen = ({ album, onBack }: AlbumDetailScreenProps) => {
 
   const handlePlayAlbum = () => {
     if (album.songs.length > 0) {
-      playSong(album.songs[0]);
+      playSong(album.songs[0], album.songs);
     }
   };
 
-  const handlePlaySong = (song: typeof album.songs[0]) => {
-    playSong(song);
+  const handlePlaySong = (song: typeof album.songs[0], index: number) => {
+    playSong(song, album.songs);
   };
 
   return (
@@ -74,42 +75,56 @@ const AlbumDetailScreen = ({ album, onBack }: AlbumDetailScreenProps) => {
         </div>
 
         {/* Songs list */}
-        <div className="space-y-2">
-          {album.songs.map((song, index) => (
-            <Card 
-              key={song.id} 
-              className={`bg-gray-800 border-gray-700 hover:bg-gray-750 transition-colors cursor-pointer ${
-                playerState.currentSong?.id === song.id ? 'bg-gray-750 border-red-500' : ''
-              }`}
-            >
-              <CardContent className="p-3">
-                <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${
-                    playerState.currentSong?.id === song.id && playerState.isPlaying
-                      ? 'bg-red-500 text-white'
-                      : 'bg-gray-700 text-gray-400'
-                  }`}>
-                    {playerState.currentSong?.id === song.id && playerState.isPlaying ? '♪' : index + 1}
+        <div className="space-y-1">
+          {album.songs.map((song, index) => {
+            const isCurrentSong = playerState.currentSong?.id === song.id;
+            const isPlaying = isCurrentSong && playerState.isPlaying;
+            
+            return (
+              <Card 
+                key={song.id} 
+                className={`bg-gray-800 border-gray-700 hover:bg-gray-750 transition-colors cursor-pointer group ${
+                  isCurrentSong ? 'bg-gray-750 border-red-500' : ''
+                }`}
+                onClick={() => handlePlaySong(song, index)}
+              >
+                <CardContent className="p-3">
+                  <div className="flex items-center gap-3">
+                    {/* Track number / Play button */}
+                    <div className="relative w-8 h-8 flex items-center justify-center">
+                      <span className={`text-sm group-hover:opacity-0 transition-opacity ${
+                        isCurrentSong ? 'text-red-400' : 'text-gray-400'
+                      }`}>
+                        {isPlaying ? '♪' : (song.trackNumber || index + 1)}
+                      </span>
+                      <Play className={`w-4 h-4 text-white absolute opacity-0 group-hover:opacity-100 transition-opacity ${
+                        isCurrentSong ? 'opacity-100' : ''
+                      }`} />
+                    </div>
+                    
+                    {/* Song info */}
+                    <div className="flex-1 min-w-0">
+                      <h3 className={`text-sm font-medium truncate ${
+                        isCurrentSong ? 'text-red-400' : 'text-white'
+                      }`}>
+                        {song.name}
+                      </h3>
+                      {song.artist && (
+                        <p className="text-xs text-gray-400 truncate">
+                          {song.artist}
+                        </p>
+                      )}
+                    </div>
+                    
+                    {/* Duration */}
+                    <div className="text-xs text-gray-400 flex-shrink-0">
+                      {song.duration || '--:--'}
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <h3 className={`text-sm font-medium ${
-                      playerState.currentSong?.id === song.id ? 'text-red-400' : 'text-white'
-                    }`}>
-                      {song.name.replace(/\.(mp3|opus|m4a|flac|wav)$/i, '')}
-                    </h3>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="text-gray-400 hover:text-white"
-                    onClick={() => handlePlaySong(song)}
-                  >
-                    <Play className="w-4 h-4" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       </div>
     </div>

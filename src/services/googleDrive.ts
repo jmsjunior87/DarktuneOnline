@@ -1,10 +1,18 @@
-
 export interface DriveFile {
   id: string;
   name: string;
   mimeType: string;
   parents?: string[];
   webContentLink?: string;
+}
+
+export interface TrackInfo {
+  id: string;
+  title: string;
+  artist: string;
+  album: string;
+  trackNumber: number;
+  duration: string;
 }
 
 export interface Album {
@@ -21,6 +29,8 @@ export interface Song {
   albumId: string;
   albumName?: string;
   artist?: string;
+  trackNumber?: number;
+  duration?: string;
 }
 
 export class GoogleDriveService {
@@ -50,12 +60,10 @@ export class GoogleDriveService {
     return response.json();
   }
 
-  // Nova abordagem: download do arquivo para blob e criação de URL local
   async downloadFileAsBlob(fileId: string): Promise<string> {
     console.log('📥 Baixando arquivo para reprodução local:', fileId);
     
     try {
-      // Tenta diferentes URLs de download
       const downloadUrls = [
         `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${this.apiKey}`,
         `https://drive.google.com/uc?export=download&id=${fileId}`,
@@ -68,7 +76,7 @@ export class GoogleDriveService {
           const response = await fetch(url, {
             method: 'GET',
             headers: {
-              'Range': 'bytes=0-' // Permite streaming parcial
+              'Range': 'bytes=0-'
             }
           });
 
@@ -105,15 +113,32 @@ export class GoogleDriveService {
     return response.files;
   }
 
-  // Extrai artista do nome do arquivo (formato: "Artista - Música.ext")
-  private extractArtistFromFilename(filename: string): string | undefined {
-    const match = filename.match(/^(.+?)\s*-\s*(.+)\.(mp3|opus|m4a|flac|wav|ogg)$/i);
-    return match ? match[1].trim() : undefined;
-  }
+  async getIndexJsonContent(folderId: string): Promise<TrackInfo[] | null> {
+    try {
+      const files = await this.getFilesInFolder(folderId);
+      const indexFile = files.find(file => file.name.toLowerCase() === 'index.json');
+      
+      if (!indexFile) {
+        console.log('📄 Arquivo index.json não encontrado na pasta');
+        return null;
+      }
 
-  // Remove extensão e formatação do nome da música
-  private cleanSongName(filename: string): string {
-    return filename.replace(/\.(mp3|opus|m4a|flac|wav|ogg)$/i, '').replace(/^.*?\s*-\s*/, '');
+      console.log('📄 Carregando index.json:', indexFile.id);
+      const response = await fetch(`${this.baseUrl}/files/${indexFile.id}?alt=media&key=${this.apiKey}`);
+      
+      if (!response.ok) {
+        throw new Error('Erro ao baixar index.json');
+      }
+
+      const jsonContent = await response.text();
+      const trackInfos: TrackInfo[] = JSON.parse(jsonContent);
+      console.log('✅ Index.json carregado com', trackInfos.length, 'faixas');
+      
+      return trackInfos;
+    } catch (error) {
+      console.error('❌ Erro ao carregar index.json:', error);
+      return null;
+    }
   }
 
   async getAlbums(): Promise<Album[]> {
@@ -129,28 +154,58 @@ export class GoogleDriveService {
       console.log('🎼 Processando álbum:', folder.name);
       const files = await this.getFilesInFolder(folder.id);
       
+      // Tentar carregar index.json primeiro
+      const trackInfos = await this.getIndexJsonContent(folder.id);
+      
       const songs: Song[] = [];
       let coverUrl: string | undefined;
 
+      // Procurar por capa
       for (const file of files) {
-        if (this.isAudioFile(file.name)) {
-          console.log('🎵 Arquivo de áudio encontrado:', file.name);
-          
-          const artist = this.extractArtistFromFilename(file.name);
-          const cleanName = this.cleanSongName(file.name);
-          
-          // Armazenar apenas o ID do arquivo - o download será feito quando necessário
-          songs.push({
-            id: file.id,
-            name: cleanName || file.name,
-            url: file.id, // Armazenar apenas o ID
-            albumId: folder.id,
-            albumName: folder.name,
-            artist: artist
-          });
-        } else if (this.isCoverFile(file.name)) {
+        if (this.isCoverFile(file.name)) {
           coverUrl = `https://drive.google.com/thumbnail?id=${file.id}&sz=w400-h400`;
           console.log('🖼️ Capa encontrada para', folder.name, ':', coverUrl);
+          break;
+        }
+      }
+
+      if (trackInfos && trackInfos.length > 0) {
+        // Usar informações do index.json
+        console.log('📋 Usando informações do index.json');
+        for (const trackInfo of trackInfos) {
+          songs.push({
+            id: trackInfo.id,
+            name: trackInfo.title,
+            url: trackInfo.id,
+            albumId: folder.id,
+            albumName: folder.name,
+            artist: trackInfo.artist,
+            trackNumber: trackInfo.trackNumber,
+            duration: trackInfo.duration
+          });
+        }
+        
+        // Ordenar por trackNumber
+        songs.sort((a, b) => (a.trackNumber || 0) - (b.trackNumber || 0));
+      } else {
+        // Fallback: usar arquivos de áudio encontrados
+        console.log('📋 Fallback: usando arquivos de áudio encontrados');
+        for (const file of files) {
+          if (this.isAudioFile(file.name)) {
+            console.log('🎵 Arquivo de áudio encontrado:', file.name);
+            
+            const artist = this.extractArtistFromFilename(file.name);
+            const cleanName = this.cleanSongName(file.name);
+            
+            songs.push({
+              id: file.id,
+              name: cleanName || file.name,
+              url: file.id,
+              albumId: folder.id,
+              albumName: folder.name,
+              artist: artist
+            });
+          }
         }
       }
 
@@ -167,6 +222,15 @@ export class GoogleDriveService {
 
     console.log('🎉 Total de álbuns processados:', albums.length);
     return albums;
+  }
+
+  private extractArtistFromFilename(filename: string): string | undefined {
+    const match = filename.match(/^(.+?)\s*-\s*(.+)\.(mp3|opus|m4a|flac|wav|ogg)$/i);
+    return match ? match[1].trim() : undefined;
+  }
+
+  private cleanSongName(filename: string): string {
+    return filename.replace(/\.(mp3|opus|m4a|flac|wav|ogg)$/i, '').replace(/^.*?\s*-\s*/, '');
   }
 
   private isAudioFile(filename: string): boolean {

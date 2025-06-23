@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Song } from '@/services/googleDrive';
 import { GoogleDriveService } from '@/services/googleDrive';
+import { usePlaylist } from './usePlaylist';
 
 export interface PlayerState {
   currentSong: Song | null;
@@ -17,6 +18,7 @@ export const useMusicPlayer = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const driveService = GoogleDriveService.getInstance();
   const currentBlobUrlRef = useRef<string | null>(null);
+  const playlist = usePlaylist();
   
   const [playerState, setPlayerState] = useState<PlayerState>({
     currentSong: null,
@@ -54,8 +56,15 @@ export const useMusicPlayer = () => {
     };
 
     const handleEnded = () => {
-      console.log('🏁 Música terminou');
+      console.log('🏁 Música terminou, reproduzindo próxima...');
       setPlayerState(prev => ({ ...prev, isPlaying: false }));
+      
+      // Reproduzir próxima música automaticamente
+      const nextSong = playlist.playNext();
+      if (nextSong) {
+        console.log('▶️ Reproduzindo próxima música:', nextSong.name);
+        playSongInternal(nextSong);
+      }
     };
 
     const handleError = (e: Event) => {
@@ -95,14 +104,13 @@ export const useMusicPlayer = () => {
       audio.removeEventListener('loadstart', handleLoadStart);
       audio.pause();
       
-      // Limpa blob URL se existir
       if (currentBlobUrlRef.current) {
         URL.revokeObjectURL(currentBlobUrlRef.current);
       }
     };
-  }, []);
+  }, [playlist]);
 
-  const playSong = useCallback(async (song: Song) => {
+  const playSongInternal = useCallback(async (song: Song) => {
     if (!audioRef.current) {
       console.error('❌ Audio ref não disponível');
       return;
@@ -120,17 +128,14 @@ export const useMusicPlayer = () => {
         currentTime: 0
       }));
 
-      // Para a música atual
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
 
-      // Limpa blob URL anterior se existir
       if (currentBlobUrlRef.current) {
         URL.revokeObjectURL(currentBlobUrlRef.current);
         currentBlobUrlRef.current = null;
       }
 
-      // Baixa o arquivo e cria blob URL local
       console.log('📥 Iniciando download do arquivo...');
       const blobUrl = await driveService.downloadFileAsBlob(song.url);
       currentBlobUrlRef.current = blobUrl;
@@ -138,7 +143,6 @@ export const useMusicPlayer = () => {
       console.log('🔗 Usando URL local:', blobUrl);
       audioRef.current.src = blobUrl;
       
-      // Aguarda o carregamento dos metadados
       await new Promise((resolve, reject) => {
         const handleCanPlay = () => {
           audioRef.current?.removeEventListener('canplay', handleCanPlay);
@@ -155,7 +159,6 @@ export const useMusicPlayer = () => {
         audioRef.current?.addEventListener('canplay', handleCanPlay);
         audioRef.current?.addEventListener('error', handleError);
         
-        // Timeout de 15 segundos para download
         setTimeout(() => {
           audioRef.current?.removeEventListener('canplay', handleCanPlay);
           audioRef.current?.removeEventListener('error', handleError);
@@ -178,6 +181,14 @@ export const useMusicPlayer = () => {
     }
   }, [driveService]);
 
+  const playSong = useCallback(async (song: Song, albumSongs?: Song[]) => {
+    if (albumSongs) {
+      const songIndex = albumSongs.findIndex(s => s.id === song.id);
+      playlist.setQueue(albumSongs, songIndex);
+    }
+    await playSongInternal(song);
+  }, [playSongInternal, playlist]);
+
   const pauseSong = useCallback(() => {
     if (!audioRef.current) return;
     audioRef.current.pause();
@@ -188,9 +199,9 @@ export const useMusicPlayer = () => {
     if (playerState.isPlaying) {
       pauseSong();
     } else if (playerState.currentSong) {
-      playSong(playerState.currentSong);
+      playSongInternal(playerState.currentSong);
     }
-  }, [playerState.isPlaying, playerState.currentSong, pauseSong, playSong]);
+  }, [playerState.isPlaying, playerState.currentSong, pauseSong, playSongInternal]);
 
   const setVolume = useCallback((volume: number) => {
     if (!audioRef.current) return;
@@ -206,10 +217,19 @@ export const useMusicPlayer = () => {
 
   return {
     playerState,
+    playlistState: playlist.playlistState,
     playSong,
     pauseSong,
     togglePlay,
     setVolume,
     seekTo,
+    playNext: () => {
+      const nextSong = playlist.playNext();
+      if (nextSong) playSongInternal(nextSong);
+    },
+    playPrevious: () => {
+      const prevSong = playlist.playPrevious();
+      if (prevSong) playSongInternal(prevSong);
+    }
   };
 };
