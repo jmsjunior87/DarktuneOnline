@@ -2,18 +2,14 @@
 import React, { createContext, useContext } from 'react';
 import { useMusicPlayer, PlayerState } from '@/hooks/useMusicPlayer';
 import { Song } from '@/services/googleDrive';
-import { PlaylistState } from '@/hooks/usePlaylist';
 
 interface MusicPlayerContextType {
   playerState: PlayerState;
-  playlistState: PlaylistState;
-  playSong: (song: Song, albumSongs?: Song[]) => void;
+  playSong: (song: Song) => void;
   pauseSong: () => void;
   togglePlay: () => void;
   setVolume: (volume: number) => void;
   seekTo: (time: number) => void;
-  playNext: () => void;
-  playPrevious: () => void;
 }
 
 const MusicPlayerContext = createContext<MusicPlayerContextType | undefined>(undefined);
