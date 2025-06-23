@@ -123,18 +123,35 @@ export class GoogleDriveService {
         return null;
       }
 
-      console.log('📄 Carregando index.json:', indexFile.id);
-      const response = await fetch(`${this.baseUrl}/files/${indexFile.id}?alt=media&key=${this.apiKey}`);
+      console.log('📄 Baixando index.json:', indexFile.id);
       
-      if (!response.ok) {
-        throw new Error('Erro ao baixar index.json');
-      }
+      // Usar o mesmo sistema de download que funciona para os arquivos de áudio
+      const downloadUrls = [
+        `https://www.googleapis.com/drive/v3/files/${indexFile.id}?alt=media&key=${this.apiKey}`,
+        `https://drive.google.com/uc?export=download&id=${indexFile.id}`,
+      ];
 
-      const jsonContent = await response.text();
-      const trackInfos: TrackInfo[] = JSON.parse(jsonContent);
-      console.log('✅ Index.json carregado com', trackInfos.length, 'faixas');
+      for (const url of downloadUrls) {
+        try {
+          console.log('🔗 Tentando baixar index.json de:', url);
+          
+          const response = await fetch(url, {
+            method: 'GET'
+          });
+
+          if (response.ok) {
+            const jsonContent = await response.text();
+            const trackInfos: TrackInfo[] = JSON.parse(jsonContent);
+            console.log('✅ Index.json carregado com', trackInfos.length, 'faixas');
+            return trackInfos;
+          }
+        } catch (error) {
+          console.log('⚠️ Falha ao baixar index.json, tentando próxima URL...', error);
+          continue;
+        }
+      }
       
-      return trackInfos;
+      throw new Error('Não foi possível baixar o index.json');
     } catch (error) {
       console.error('❌ Erro ao carregar index.json:', error);
       return null;
