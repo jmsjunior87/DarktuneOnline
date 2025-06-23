@@ -1,4 +1,3 @@
-
 export interface DriveFile {
   id: string;
   name: string;
@@ -50,45 +49,16 @@ export class GoogleDriveService {
     return response.json();
   }
 
-  // Nova abordagem: download do arquivo para blob e criação de URL local
-  async downloadFileAsBlob(fileId: string): Promise<string> {
-    console.log('📥 Baixando arquivo para reprodução local:', fileId);
+  // Nova função que usa proxy CORS para contornar limitações do Google Drive
+  async getStreamingUrl(fileId: string): Promise<string> {
+    console.log('🔗 Obtendo URL de streaming para arquivo:', fileId);
     
-    try {
-      // Tenta diferentes URLs de download
-      const downloadUrls = [
-        `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${this.apiKey}`,
-        `https://drive.google.com/uc?export=download&id=${fileId}`,
-      ];
-
-      for (const url of downloadUrls) {
-        try {
-          console.log('🔗 Tentando baixar de:', url);
-          
-          const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-              'Range': 'bytes=0-' // Permite streaming parcial
-            }
-          });
-
-          if (response.ok) {
-            const blob = await response.blob();
-            const audioUrl = URL.createObjectURL(blob);
-            console.log('✅ Arquivo baixado com sucesso, URL local criada');
-            return audioUrl;
-          }
-        } catch (error) {
-          console.log('⚠️ Falha no download, tentando próxima URL...', error);
-          continue;
-        }
-      }
-      
-      throw new Error('Não foi possível baixar o arquivo');
-    } catch (error) {
-      console.error('❌ Erro ao baixar arquivo:', error);
-      throw error;
-    }
+    // Usando proxy CORS gratuito para contornar restrições do Google Drive
+    const driveUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
+    const streamingUrl = `https://cors-anywhere.herokuapp.com/${driveUrl}`;
+    
+    console.log('✅ URL de streaming com proxy gerada:', streamingUrl);
+    return streamingUrl;
   }
 
   async getAlbumFolders(): Promise<DriveFile[]> {
@@ -139,7 +109,7 @@ export class GoogleDriveService {
           const artist = this.extractArtistFromFilename(file.name);
           const cleanName = this.cleanSongName(file.name);
           
-          // Armazenar apenas o ID do arquivo - o download será feito quando necessário
+          // Armazenar apenas o ID do arquivo - a URL será gerada quando necessário
           songs.push({
             id: file.id,
             name: cleanName || file.name,
