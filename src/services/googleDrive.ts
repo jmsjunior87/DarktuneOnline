@@ -1,4 +1,6 @@
 
+import { albumsRegistry } from '@/data/albums';
+
 export interface DriveFile {
   id: string;
   name: string;
@@ -21,6 +23,8 @@ export interface Song {
   albumId: string;
   albumName?: string;
   artist?: string;
+  trackNumber?: number;
+  duration?: string;
 }
 
 export class GoogleDriveService {
@@ -117,8 +121,7 @@ export class GoogleDriveService {
   }
 
   async getAlbums(): Promise<Album[]> {
-    console.log('🎵 Carregando álbuns do Google Drive...');
-    console.log('📁 Usando pasta Albums ID:', this.albumsFolderId);
+    console.log('🎵 Carregando álbuns do arquivo local...');
     
     const albumFolders = await this.getAlbumFolders();
     console.log('📂 Pastas de álbuns encontradas:', albumFolders.length);
@@ -127,41 +130,87 @@ export class GoogleDriveService {
 
     for (const folder of albumFolders) {
       console.log('🎼 Processando álbum:', folder.name);
-      const files = await this.getFilesInFolder(folder.id);
       
-      const songs: Song[] = [];
-      let coverUrl: string | undefined;
-
-      for (const file of files) {
-        if (this.isAudioFile(file.name)) {
-          console.log('🎵 Arquivo de áudio encontrado:', file.name);
-          
-          const artist = this.extractArtistFromFilename(file.name);
-          const cleanName = this.cleanSongName(file.name);
-          
-          // Armazenar apenas o ID do arquivo - o download será feito quando necessário
-          songs.push({
-            id: file.id,
-            name: cleanName || file.name,
-            url: file.id, // Armazenar apenas o ID
-            albumId: folder.id,
-            albumName: folder.name,
-            artist: artist
-          });
-        } else if (this.isCoverFile(file.name)) {
-          coverUrl = `https://drive.google.com/thumbnail?id=${file.id}&sz=w400-h400`;
-          console.log('🖼️ Capa encontrada para', folder.name, ':', coverUrl);
+      // Buscar dados do álbum no registry local
+      const albumKey = Object.keys(albumsRegistry).find(key => 
+        albumsRegistry[key].name === folder.name
+      );
+      
+      if (albumKey) {
+        const albumData = albumsRegistry[albumKey];
+        console.log('📋 Dados do álbum encontrados no registry:', albumData.name);
+        
+        // Buscar arquivos no Google Drive para validar e obter IDs reais
+        const files = await this.getFilesInFolder(folder.id);
+        let coverUrl: string | undefined;
+        
+        // Procurar por capa
+        for (const file of files) {
+          if (this.isCoverFile(file.name)) {
+            coverUrl = `https://drive.google.com/thumbnail?id=${file.id}&sz=w400-h400`;
+            console.log('🖼️ Capa encontrada para', folder.name, ':', coverUrl);
+            break;
+          }
         }
-      }
+        
+        // Usar dados do registry para criar as músicas
+        const songs: Song[] = albumData.tracks.map(track => ({
+          id: track.id,
+          name: track.title,
+          url: track.id,
+          albumId: folder.id,
+          albumName: folder.name,
+          artist: track.artist,
+          trackNumber: track.trackNumber,
+          duration: track.duration
+        }));
 
-      if (songs.length > 0) {
         albums.push({
           id: folder.id,
           name: folder.name,
-          coverUrl,
+          coverUrl: albumData.coverUrl || coverUrl,
           songs
         });
-        console.log(`✅ Álbum "${folder.name}" adicionado com ${songs.length} música(s)`);
+        
+        console.log(`✅ Álbum "${folder.name}" adicionado com ${songs.length} música(s) do registry`);
+      } else {
+        // Fallback: usar método antigo
+        console.log('📋 Fallback: usando arquivos de áudio encontrados');
+        const files = await this.getFilesInFolder(folder.id);
+        
+        const songs: Song[] = [];
+        let coverUrl: string | undefined;
+
+        for (const file of files) {
+          if (this.isAudioFile(file.name)) {
+            console.log('🎵 Arquivo de áudio encontrado:', file.name);
+            
+            const artist = this.extractArtistFromFilename(file.name);
+            const cleanName = this.cleanSongName(file.name);
+            
+            songs.push({
+              id: file.id,
+              name: cleanName || file.name,
+              url: file.id,
+              albumId: folder.id,
+              albumName: folder.name,
+              artist: artist
+            });
+          } else if (this.isCoverFile(file.name)) {
+            coverUrl = `https://drive.google.com/thumbnail?id=${file.id}&sz=w400-h400`;
+            console.log('🖼️ Capa encontrada para', folder.name, ':', coverUrl);
+          }
+        }
+
+        if (songs.length > 0) {
+          albums.push({
+            id: folder.id,
+            name: folder.name,
+            coverUrl,
+            songs
+          });
+          console.log(`✅ Álbum "${folder.name}" adicionado com ${songs.length} música(s)`);
+        }
       }
     }
 
