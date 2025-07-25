@@ -17,13 +17,7 @@ export const resonance: AlbumData = {
       artist: "Rot",
       trackNumber: 2,
       duration: "3:00"
-    },
-    {
-      id: "example-id-3",
-      title: "Track 3",
-      artist: "Rot", 
-      trackNumber: 3,
-      duration: "2:45"
     }
+    // Adicione as outras faixas aqui
   ]
 };

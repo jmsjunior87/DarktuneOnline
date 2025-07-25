@@ -5,7 +5,7 @@ import { Song } from '@/services/googleDrive';
 
 interface MusicPlayerContextType {
   playerState: PlayerState;
-  playSong: (song: Song, playlist?: Song[]) => void;
+  playSong: (song: Song) => void;
   pauseSong: () => void;
   togglePlay: () => void;
   setVolume: (volume: number) => void;

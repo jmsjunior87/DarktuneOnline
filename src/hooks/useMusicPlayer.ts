@@ -11,16 +11,12 @@ export interface PlayerState {
   duration: number;
   isLoading: boolean;
   error: string | null;
-  currentPlaylist: Song[];
-  currentIndex: number;
 }
 
 export const useMusicPlayer = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const driveService = GoogleDriveService.getInstance();
   const currentBlobUrlRef = useRef<string | null>(null);
-  const nextSongBlobUrlRef = useRef<string | null>(null);
-  const isPreloadingRef = useRef(false);
   
   const [playerState, setPlayerState] = useState<PlayerState>({
     currentSong: null,
@@ -30,8 +26,6 @@ export const useMusicPlayer = () => {
     duration: 0,
     isLoading: false,
     error: null,
-    currentPlaylist: [],
-    currentIndex: -1,
   });
 
   // Initialize audio element
@@ -57,31 +51,11 @@ export const useMusicPlayer = () => {
 
     const handleTimeUpdate = () => {
       setPlayerState(prev => ({ ...prev, currentTime: audio.currentTime }));
-      
-      // Pré-carregamento da próxima música quando restam 15 segundos
-      const timeLeft = audio.duration - audio.currentTime;
-      if (timeLeft <= 15 && timeLeft > 14.5 && !isPreloadingRef.current) {
-        preloadNextSong();
-      }
     };
 
     const handleEnded = () => {
       console.log('🏁 Música terminou');
-      setPlayerState(prev => {
-        const nextIndex = prev.currentIndex + 1;
-        if (nextIndex < prev.currentPlaylist.length) {
-          const nextSong = prev.currentPlaylist[nextIndex];
-          console.log('🎵 Tocando próxima música:', nextSong.name);
-          // A próxima música será tocada pelo useEffect que observa mudanças no currentSong
-          return {
-            ...prev,
-            currentSong: nextSong,
-            currentIndex: nextIndex,
-            isPlaying: false, // Será alterado para true quando a música carregar
-          };
-        }
-        return { ...prev, isPlaying: false };
-      });
+      setPlayerState(prev => ({ ...prev, isPlaying: false }));
     };
 
     const handleError = (e: Event) => {
@@ -121,47 +95,14 @@ export const useMusicPlayer = () => {
       audio.removeEventListener('loadstart', handleLoadStart);
       audio.pause();
       
-      // Limpa blob URLs se existirem
+      // Limpa blob URL se existir
       if (currentBlobUrlRef.current) {
         URL.revokeObjectURL(currentBlobUrlRef.current);
-      }
-      if (nextSongBlobUrlRef.current) {
-        URL.revokeObjectURL(nextSongBlobUrlRef.current);
       }
     };
   }, []);
 
-  // Função para pré-carregar a próxima música
-  const preloadNextSong = useCallback(async () => {
-    if (isPreloadingRef.current) return;
-    
-    const nextIndex = playerState.currentIndex + 1;
-    if (nextIndex >= playerState.currentPlaylist.length) return;
-    
-    const nextSong = playerState.currentPlaylist[nextIndex];
-    if (!nextSong) return;
-    
-    isPreloadingRef.current = true;
-    console.log('🔄 Pré-carregando próxima música:', nextSong.name);
-    
-    try {
-      // Limpa blob URL anterior da próxima música se existir
-      if (nextSongBlobUrlRef.current) {
-        URL.revokeObjectURL(nextSongBlobUrlRef.current);
-        nextSongBlobUrlRef.current = null;
-      }
-      
-      const blobUrl = await driveService.downloadFileAsBlob(nextSong.url);
-      nextSongBlobUrlRef.current = blobUrl;
-      console.log('✅ Próxima música pré-carregada com sucesso!');
-    } catch (error) {
-      console.error('⚠️ Erro no pré-carregamento:', error);
-    } finally {
-      isPreloadingRef.current = false;
-    }
-  }, [playerState.currentIndex, playerState.currentPlaylist, driveService]);
-
-  const playSong = useCallback(async (song: Song, playlist: Song[] = []) => {
+  const playSong = useCallback(async (song: Song) => {
     if (!audioRef.current) {
       console.error('❌ Audio ref não disponível');
       return;
@@ -171,15 +112,12 @@ export const useMusicPlayer = () => {
     console.log('📂 ID do arquivo:', song.url);
     
     try {
-      const currentIndex = playlist.length > 0 ? playlist.findIndex(s => s.id === song.id) : -1;
       setPlayerState(prev => ({ 
         ...prev, 
         error: null, 
         isLoading: true,
         currentSong: song,
-        currentTime: 0,
-        currentPlaylist: playlist,
-        currentIndex: currentIndex
+        currentTime: 0
       }));
 
       // Para a música atual
@@ -192,19 +130,10 @@ export const useMusicPlayer = () => {
         currentBlobUrlRef.current = null;
       }
 
-      // Verifica se a música já foi pré-carregada
-      let blobUrl: string;
-      if (nextSongBlobUrlRef.current && song.id === playlist[currentIndex]?.id) {
-        console.log('✅ Usando música pré-carregada!');
-        blobUrl = nextSongBlobUrlRef.current;
-        currentBlobUrlRef.current = blobUrl;
-        nextSongBlobUrlRef.current = null;
-      } else {
-        // Baixa o arquivo e cria blob URL local
-        console.log('📥 Iniciando download do arquivo...');
-        blobUrl = await driveService.downloadFileAsBlob(song.url);
-        currentBlobUrlRef.current = blobUrl;
-      }
+      // Baixa o arquivo e cria blob URL local
+      console.log('📥 Iniciando download do arquivo...');
+      const blobUrl = await driveService.downloadFileAsBlob(song.url);
+      currentBlobUrlRef.current = blobUrl;
       
       console.log('🔗 Usando URL local:', blobUrl);
       audioRef.current.src = blobUrl;
@@ -259,9 +188,9 @@ export const useMusicPlayer = () => {
     if (playerState.isPlaying) {
       pauseSong();
     } else if (playerState.currentSong) {
-      playSong(playerState.currentSong, playerState.currentPlaylist);
+      playSong(playerState.currentSong);
     }
-  }, [playerState.isPlaying, playerState.currentSong, playerState.currentPlaylist, pauseSong, playSong]);
+  }, [playerState.isPlaying, playerState.currentSong, pauseSong, playSong]);
 
   const setVolume = useCallback((volume: number) => {
     if (!audioRef.current) return;
@@ -274,89 +203,6 @@ export const useMusicPlayer = () => {
     audioRef.current.currentTime = time;
     setPlayerState(prev => ({ ...prev, currentTime: time }));
   }, []);
-
-  // Auto-play próxima música quando currentSong muda devido ao handleEnded
-  useEffect(() => {
-    if (playerState.currentSong && !playerState.isPlaying && !playerState.isLoading && !playerState.error) {
-      const autoPlay = async () => {
-        try {
-          if (!audioRef.current) return;
-          
-          const currentIndex = playerState.currentPlaylist.findIndex(s => s.id === playerState.currentSong?.id);
-          if (currentIndex === -1) return;
-          
-          // Usa lógica similar ao playSong mas sem re-definir o state
-          const song = playerState.currentSong;
-          
-          // Para a música atual
-          audioRef.current.pause();
-          audioRef.current.currentTime = 0;
-
-          // Limpa blob URL anterior se existir
-          if (currentBlobUrlRef.current) {
-            URL.revokeObjectURL(currentBlobUrlRef.current);
-            currentBlobUrlRef.current = null;
-          }
-
-          // Verifica se a música já foi pré-carregada
-          let blobUrl: string;
-          if (nextSongBlobUrlRef.current && song.id === playerState.currentPlaylist[currentIndex]?.id) {
-            console.log('✅ Usando música pré-carregada!');
-            blobUrl = nextSongBlobUrlRef.current;
-            currentBlobUrlRef.current = blobUrl;
-            nextSongBlobUrlRef.current = null;
-          } else {
-            // Baixa o arquivo e cria blob URL local
-            console.log('📥 Iniciando download do arquivo...');
-            blobUrl = await driveService.downloadFileAsBlob(song.url);
-            currentBlobUrlRef.current = blobUrl;
-          }
-          
-          audioRef.current.src = blobUrl;
-          
-          // Aguarda o carregamento
-          await new Promise((resolve, reject) => {
-            const handleCanPlay = () => {
-              audioRef.current?.removeEventListener('canplay', handleCanPlay);
-              audioRef.current?.removeEventListener('error', handleError);
-              resolve(true);
-            };
-            
-            const handleError = () => {
-              audioRef.current?.removeEventListener('canplay', handleCanPlay);
-              audioRef.current?.removeEventListener('error', handleError);
-              reject(new Error('Erro ao carregar arquivo local'));
-            };
-            
-            audioRef.current?.addEventListener('canplay', handleCanPlay);
-            audioRef.current?.addEventListener('error', handleError);
-            
-            setTimeout(() => {
-              audioRef.current?.removeEventListener('canplay', handleCanPlay);
-              audioRef.current?.removeEventListener('error', handleError);
-              reject(new Error('Timeout no carregamento'));
-            }, 15000);
-          });
-          
-          await audioRef.current.play();
-          setPlayerState(prev => ({ ...prev, isPlaying: true, isLoading: false }));
-          
-        } catch (error) {
-          console.error('Erro no auto-play:', error);
-          setPlayerState(prev => ({ 
-            ...prev, 
-            isPlaying: false, 
-            isLoading: false,
-            error: 'Erro no auto-play'
-          }));
-        }
-      };
-      
-      // Pequeno delay para evitar conflitos
-      const timeoutId = setTimeout(autoPlay, 100);
-      return () => clearTimeout(timeoutId);
-    }
-  }, [playerState.currentSong?.id, playerState.isPlaying, playerState.isLoading, playerState.error]);
 
   return {
     playerState,
