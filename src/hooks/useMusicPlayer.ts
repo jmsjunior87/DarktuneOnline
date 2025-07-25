@@ -11,6 +11,8 @@ export interface PlayerState {
   duration: number;
   isLoading: boolean;
   error: string | null;
+  currentPlaylist: Song[];
+  currentIndex: number;
 }
 
 export const useMusicPlayer = () => {
@@ -26,6 +28,8 @@ export const useMusicPlayer = () => {
     duration: 0,
     isLoading: false,
     error: null,
+    currentPlaylist: [],
+    currentIndex: -1,
   });
 
   // Initialize audio element
@@ -55,7 +59,21 @@ export const useMusicPlayer = () => {
 
     const handleEnded = () => {
       console.log('🏁 Música terminou');
-      setPlayerState(prev => ({ ...prev, isPlaying: false }));
+      setPlayerState(prev => {
+        const nextIndex = prev.currentIndex + 1;
+        if (nextIndex < prev.currentPlaylist.length) {
+          const nextSong = prev.currentPlaylist[nextIndex];
+          console.log('🎵 Tocando próxima música:', nextSong.name);
+          // A próxima música será tocada pelo useEffect que observa mudanças no currentSong
+          return {
+            ...prev,
+            currentSong: nextSong,
+            currentIndex: nextIndex,
+            isPlaying: false, // Será alterado para true quando a música carregar
+          };
+        }
+        return { ...prev, isPlaying: false };
+      });
     };
 
     const handleError = (e: Event) => {
@@ -102,7 +120,7 @@ export const useMusicPlayer = () => {
     };
   }, []);
 
-  const playSong = useCallback(async (song: Song) => {
+  const playSong = useCallback(async (song: Song, playlist: Song[] = []) => {
     if (!audioRef.current) {
       console.error('❌ Audio ref não disponível');
       return;
@@ -112,12 +130,15 @@ export const useMusicPlayer = () => {
     console.log('📂 ID do arquivo:', song.url);
     
     try {
+      const currentIndex = playlist.length > 0 ? playlist.findIndex(s => s.id === song.id) : -1;
       setPlayerState(prev => ({ 
         ...prev, 
         error: null, 
         isLoading: true,
         currentSong: song,
-        currentTime: 0
+        currentTime: 0,
+        currentPlaylist: playlist,
+        currentIndex: currentIndex
       }));
 
       // Para a música atual
@@ -188,9 +209,9 @@ export const useMusicPlayer = () => {
     if (playerState.isPlaying) {
       pauseSong();
     } else if (playerState.currentSong) {
-      playSong(playerState.currentSong);
+      playSong(playerState.currentSong, playerState.currentPlaylist);
     }
-  }, [playerState.isPlaying, playerState.currentSong, pauseSong, playSong]);
+  }, [playerState.isPlaying, playerState.currentSong, playerState.currentPlaylist, pauseSong, playSong]);
 
   const setVolume = useCallback((volume: number) => {
     if (!audioRef.current) return;
@@ -203,6 +224,23 @@ export const useMusicPlayer = () => {
     audioRef.current.currentTime = time;
     setPlayerState(prev => ({ ...prev, currentTime: time }));
   }, []);
+
+  // Auto-play próxima música quando currentSong muda devido ao handleEnded
+  useEffect(() => {
+    if (playerState.currentSong && !playerState.isPlaying && !playerState.isLoading && !playerState.error) {
+      const autoPlay = async () => {
+        try {
+          await playSong(playerState.currentSong, playerState.currentPlaylist);
+        } catch (error) {
+          console.error('Erro no auto-play:', error);
+        }
+      };
+      
+      // Pequeno delay para evitar conflitos
+      const timeoutId = setTimeout(autoPlay, 100);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [playerState.currentSong, playerState.isPlaying, playerState.isLoading, playerState.error]);
 
   return {
     playerState,

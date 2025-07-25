@@ -65,13 +65,13 @@ const Index = () => {
       </header>
 
       {/* Main Content - adjust for player */}
-      <main className={`flex-1 overflow-hidden ${playerState.currentSong ? 'pb-32' : ''}`}>
+      <main className={`flex-1 overflow-hidden ${playerState.currentSong ? 'pb-36' : ''}`}>
         {renderActiveScreen()}
       </main>
 
       {/* Music Player Controls - conditionally rendered */}
       {playerState.currentSong && (
-        <div className="fixed bottom-16 left-0 right-0">
+        <div className="fixed bottom-16 left-0 right-0 z-50">
           <MusicPlayerControls />
         </div>
       )}
