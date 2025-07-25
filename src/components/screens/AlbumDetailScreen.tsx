@@ -14,12 +14,12 @@ const AlbumDetailScreen = ({ album, onBack }: AlbumDetailScreenProps) => {
 
   const handlePlayAlbum = () => {
     if (album.songs.length > 0) {
-      playSong(album.songs[0]);
+      playSong(album.songs[0], album.songs);
     }
   };
 
   const handlePlaySong = (song: typeof album.songs[0]) => {
-    playSong(song);
+    playSong(song, album.songs);
   };
 
   return (

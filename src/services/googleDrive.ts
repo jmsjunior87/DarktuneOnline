@@ -168,7 +168,7 @@ export class GoogleDriveService {
         albums.push({
           id: folder.id,
           name: folder.name,
-          coverUrl: albumData.coverUrl || coverUrl,
+          coverUrl: coverUrl || `https://drive.google.com/thumbnail?id=${folder.id}&sz=w400-h400`,
           songs
         });
         
