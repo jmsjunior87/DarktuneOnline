@@ -280,9 +280,75 @@ export const useMusicPlayer = () => {
     if (playerState.currentSong && !playerState.isPlaying && !playerState.isLoading && !playerState.error) {
       const autoPlay = async () => {
         try {
-          await playSong(playerState.currentSong, playerState.currentPlaylist);
+          if (!audioRef.current) return;
+          
+          const currentIndex = playerState.currentPlaylist.findIndex(s => s.id === playerState.currentSong?.id);
+          if (currentIndex === -1) return;
+          
+          // Usa lógica similar ao playSong mas sem re-definir o state
+          const song = playerState.currentSong;
+          
+          // Para a música atual
+          audioRef.current.pause();
+          audioRef.current.currentTime = 0;
+
+          // Limpa blob URL anterior se existir
+          if (currentBlobUrlRef.current) {
+            URL.revokeObjectURL(currentBlobUrlRef.current);
+            currentBlobUrlRef.current = null;
+          }
+
+          // Verifica se a música já foi pré-carregada
+          let blobUrl: string;
+          if (nextSongBlobUrlRef.current && song.id === playerState.currentPlaylist[currentIndex]?.id) {
+            console.log('✅ Usando música pré-carregada!');
+            blobUrl = nextSongBlobUrlRef.current;
+            currentBlobUrlRef.current = blobUrl;
+            nextSongBlobUrlRef.current = null;
+          } else {
+            // Baixa o arquivo e cria blob URL local
+            console.log('📥 Iniciando download do arquivo...');
+            blobUrl = await driveService.downloadFileAsBlob(song.url);
+            currentBlobUrlRef.current = blobUrl;
+          }
+          
+          audioRef.current.src = blobUrl;
+          
+          // Aguarda o carregamento
+          await new Promise((resolve, reject) => {
+            const handleCanPlay = () => {
+              audioRef.current?.removeEventListener('canplay', handleCanPlay);
+              audioRef.current?.removeEventListener('error', handleError);
+              resolve(true);
+            };
+            
+            const handleError = () => {
+              audioRef.current?.removeEventListener('canplay', handleCanPlay);
+              audioRef.current?.removeEventListener('error', handleError);
+              reject(new Error('Erro ao carregar arquivo local'));
+            };
+            
+            audioRef.current?.addEventListener('canplay', handleCanPlay);
+            audioRef.current?.addEventListener('error', handleError);
+            
+            setTimeout(() => {
+              audioRef.current?.removeEventListener('canplay', handleCanPlay);
+              audioRef.current?.removeEventListener('error', handleError);
+              reject(new Error('Timeout no carregamento'));
+            }, 15000);
+          });
+          
+          await audioRef.current.play();
+          setPlayerState(prev => ({ ...prev, isPlaying: true, isLoading: false }));
+          
         } catch (error) {
           console.error('Erro no auto-play:', error);
+          setPlayerState(prev => ({ 
+            ...prev, 
+            isPlaying: false, 
+            isLoading: false,
+            error: 'Erro no auto-play'
+          }));
         }
       };
       
@@ -290,7 +356,7 @@ export const useMusicPlayer = () => {
       const timeoutId = setTimeout(autoPlay, 100);
       return () => clearTimeout(timeoutId);
     }
-  }, [playerState.currentSong, playerState.isPlaying, playerState.isLoading, playerState.error]);
+  }, [playerState.currentSong?.id, playerState.isPlaying, playerState.isLoading, playerState.error]);
 
   return {
     playerState,
