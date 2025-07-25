@@ -19,6 +19,8 @@ export const useMusicPlayer = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const driveService = GoogleDriveService.getInstance();
   const currentBlobUrlRef = useRef<string | null>(null);
+  const nextSongBlobUrlRef = useRef<string | null>(null);
+  const isPreloadingRef = useRef(false);
   
   const [playerState, setPlayerState] = useState<PlayerState>({
     currentSong: null,
@@ -55,6 +57,12 @@ export const useMusicPlayer = () => {
 
     const handleTimeUpdate = () => {
       setPlayerState(prev => ({ ...prev, currentTime: audio.currentTime }));
+      
+      // Pré-carregamento da próxima música quando restam 15 segundos
+      const timeLeft = audio.duration - audio.currentTime;
+      if (timeLeft <= 15 && timeLeft > 14.5 && !isPreloadingRef.current) {
+        preloadNextSong();
+      }
     };
 
     const handleEnded = () => {
@@ -113,12 +121,45 @@ export const useMusicPlayer = () => {
       audio.removeEventListener('loadstart', handleLoadStart);
       audio.pause();
       
-      // Limpa blob URL se existir
+      // Limpa blob URLs se existirem
       if (currentBlobUrlRef.current) {
         URL.revokeObjectURL(currentBlobUrlRef.current);
       }
+      if (nextSongBlobUrlRef.current) {
+        URL.revokeObjectURL(nextSongBlobUrlRef.current);
+      }
     };
   }, []);
+
+  // Função para pré-carregar a próxima música
+  const preloadNextSong = useCallback(async () => {
+    if (isPreloadingRef.current) return;
+    
+    const nextIndex = playerState.currentIndex + 1;
+    if (nextIndex >= playerState.currentPlaylist.length) return;
+    
+    const nextSong = playerState.currentPlaylist[nextIndex];
+    if (!nextSong) return;
+    
+    isPreloadingRef.current = true;
+    console.log('🔄 Pré-carregando próxima música:', nextSong.name);
+    
+    try {
+      // Limpa blob URL anterior da próxima música se existir
+      if (nextSongBlobUrlRef.current) {
+        URL.revokeObjectURL(nextSongBlobUrlRef.current);
+        nextSongBlobUrlRef.current = null;
+      }
+      
+      const blobUrl = await driveService.downloadFileAsBlob(nextSong.url);
+      nextSongBlobUrlRef.current = blobUrl;
+      console.log('✅ Próxima música pré-carregada com sucesso!');
+    } catch (error) {
+      console.error('⚠️ Erro no pré-carregamento:', error);
+    } finally {
+      isPreloadingRef.current = false;
+    }
+  }, [playerState.currentIndex, playerState.currentPlaylist, driveService]);
 
   const playSong = useCallback(async (song: Song, playlist: Song[] = []) => {
     if (!audioRef.current) {
@@ -151,10 +192,19 @@ export const useMusicPlayer = () => {
         currentBlobUrlRef.current = null;
       }
 
-      // Baixa o arquivo e cria blob URL local
-      console.log('📥 Iniciando download do arquivo...');
-      const blobUrl = await driveService.downloadFileAsBlob(song.url);
-      currentBlobUrlRef.current = blobUrl;
+      // Verifica se a música já foi pré-carregada
+      let blobUrl: string;
+      if (nextSongBlobUrlRef.current && song.id === playlist[currentIndex]?.id) {
+        console.log('✅ Usando música pré-carregada!');
+        blobUrl = nextSongBlobUrlRef.current;
+        currentBlobUrlRef.current = blobUrl;
+        nextSongBlobUrlRef.current = null;
+      } else {
+        // Baixa o arquivo e cria blob URL local
+        console.log('📥 Iniciando download do arquivo...');
+        blobUrl = await driveService.downloadFileAsBlob(song.url);
+        currentBlobUrlRef.current = blobUrl;
+      }
       
       console.log('🔗 Usando URL local:', blobUrl);
       audioRef.current.src = blobUrl;
