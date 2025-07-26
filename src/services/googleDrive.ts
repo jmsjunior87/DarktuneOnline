@@ -69,7 +69,7 @@ export class GoogleDriveService {
 
     try {
       // Use apenas o endpoint do seu backend proxy
-      const proxyUrl = `http://localhost:3001/api/drive/${fileId}`;
+      const proxyUrl = `https://darktuneonline.onrender.com/api/drive/${fileId}`;
 
       const response = await fetch(proxyUrl, {
         method: 'GET',
