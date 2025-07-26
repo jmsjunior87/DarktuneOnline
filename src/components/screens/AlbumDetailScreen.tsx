@@ -78,9 +78,13 @@ const AlbumDetailScreen = ({ album, onBack }: AlbumDetailScreenProps) => {
           {album.songs.map((song, index) => (
             <Card 
               key={song.id} 
+              onClick={() => handlePlaySong(song)}
               className={`bg-gray-800 border-gray-700 hover:bg-gray-750 transition-colors cursor-pointer ${
                 playerState.currentSong?.id === song.id ? 'bg-gray-750 border-red-500' : ''
               }`}
+              tabIndex={0}
+              role="button"
+              aria-label={`Tocar ${song.name}`}
             >
               <CardContent className="p-3">
                 <div className="flex items-center gap-3">
@@ -101,8 +105,8 @@ const AlbumDetailScreen = ({ album, onBack }: AlbumDetailScreenProps) => {
                   <Button
                     size="sm"
                     variant="ghost"
-                    className="text-gray-400 hover:text-white"
-                    onClick={() => handlePlaySong(song)}
+                    className="text-gray-400 hover:text-white pointer-events-none"
+                    tabIndex={-1}
                   >
                     <Play className="w-4 h-4" />
                   </Button>

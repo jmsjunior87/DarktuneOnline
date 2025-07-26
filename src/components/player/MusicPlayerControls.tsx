@@ -26,21 +26,21 @@ const MusicPlayerControls = () => {
   };
 
   return (
-    <div className="bg-gray-800 border-t border-gray-700 p-4 space-y-3">
+    <div className="bg-gray-800 border-t border-gray-700 p-2 space-y-2">
       {/* Song info */}
-      <div className="flex items-center gap-3">
-        <div className="w-12 h-12 rounded bg-gray-700 flex items-center justify-center flex-shrink-0">
+      <div className="flex items-center gap-2">
+        <div className="w-8 h-8 rounded bg-gray-700 flex items-center justify-center flex-shrink-0">
           <span className="text-xs text-gray-400">♪</span>
         </div>
         <div className="flex-1 min-w-0">
-          <h4 className="text-white text-sm font-medium truncate">
+          <h4 className="text-white text-xs font-medium truncate">
             {playerState.currentSong.name.replace(/\.(mp3|opus|m4a|flac|wav)$/i, '')}
           </h4>
           {playerState.isLoading && (
-            <p className="text-xs text-gray-400">Carregando...</p>
+            <p className="text-[10px] text-gray-400">Carregando...</p>
           )}
           {playerState.error && (
-            <div className="flex items-center gap-1 text-xs text-red-400">
+            <div className="flex items-center gap-1 text-[10px] text-red-400">
               <AlertCircle className="w-3 h-3" />
               <span className="truncate">{playerState.error}</span>
             </div>
@@ -49,67 +49,69 @@ const MusicPlayerControls = () => {
       </div>
 
       {/* Progress bar */}
-      <div className="space-y-2">
+      <div className="space-y-1">
         <Slider
           value={[playerState.currentTime]}
           max={playerState.duration || 100}
           step={1}
           onValueChange={handleProgressChange}
-          className="w-full"
+          className="w-full h-2"
           disabled={playerState.error !== null}
         />
-        <div className="flex justify-between text-xs text-gray-400">
+        <div className="flex justify-between text-[10px] text-gray-400">
           <span>{formatTime(playerState.currentTime)}</span>
           <span>{formatTime(playerState.duration)}</span>
         </div>
       </div>
 
-      {/* Controls */}
-      <div className="flex flex-col items-center gap-3">
-        <div className="flex items-center justify-center gap-4">
-          <Button
-            onClick={playPrev}
-            disabled={playerState.isLoading || playerState.error !== null}
-            className="bg-gray-700 hover:bg-gray-600 text-white disabled:bg-gray-600"
-            aria-label="Anterior"
-          >
-            <SkipBack className="w-4 h-4" />
-          </Button>
-          <Button
-            onClick={togglePlay}
-            disabled={playerState.isLoading || playerState.error !== null}
-            className="bg-red-500 hover:bg-red-600 text-white disabled:bg-gray-600"
-            aria-label="Play/Pause"
-          >
-            {playerState.isPlaying ? (
-              <Pause className="w-4 h-4" />
-            ) : (
-              <Play className="w-4 h-4" />
-            )}
-          </Button>
-          <Button
-            onClick={playNext}
-            disabled={playerState.isLoading || playerState.error !== null}
-            className="bg-gray-700 hover:bg-gray-600 text-white disabled:bg-gray-600"
-            aria-label="Próxima"
-          >
-            <SkipForward className="w-4 h-4" />
-          </Button>
+      {/* Controls centered, volume right */}
+      <div className="flex items-center justify-between gap-2">
+        {/* Centraliza os controles */}
+        <div className="flex-1 flex justify-center">
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={playPrev}
+              disabled={playerState.isLoading || playerState.error !== null}
+              className="bg-gray-700 hover:bg-gray-600 text-white disabled:bg-gray-600 p-1 h-7 w-7"
+              aria-label="Anterior"
+            >
+              <SkipBack className="w-3 h-3" />
+            </Button>
+            <Button
+              onClick={togglePlay}
+              disabled={playerState.isLoading || playerState.error !== null}
+              className="bg-red-500 hover:bg-red-600 text-white disabled:bg-gray-600 p-1 h-8 w-8"
+              aria-label="Play/Pause"
+            >
+              {playerState.isPlaying ? (
+                <Pause className="w-4 h-4" />
+              ) : (
+                <Play className="w-4 h-4" />
+              )}
+            </Button>
+            <Button
+              onClick={playNext}
+              disabled={playerState.isLoading || playerState.error !== null}
+              className="bg-gray-700 hover:bg-gray-600 text-white disabled:bg-gray-600 p-1 h-7 w-7"
+              aria-label="Próxima"
+            >
+              <SkipForward className="w-3 h-3" />
+            </Button>
+          </div>
         </div>
-
-        {/* Volume control */}
-        <div className="flex items-center gap-2 max-w-32 w-full">
+        {/* Volume control alinhado à direita */}
+        <div className="flex items-center gap-1 max-w-24 w-full justify-end">
           {playerState.volume === 0 ? (
-            <VolumeX className="w-4 h-4 text-gray-400" />
+            <VolumeX className="w-3 h-3 text-gray-400" />
           ) : (
-            <Volume2 className="w-4 h-4 text-gray-400" />
+            <Volume2 className="w-3 h-3 text-gray-400" />
           )}
           <Slider
             value={[playerState.volume]}
             max={1}
             step={0.01}
             onValueChange={handleVolumeChange}
-            className="flex-1"
+            className="flex-1 h-2"
           />
         </div>
       </div>
