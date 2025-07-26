@@ -74,46 +74,46 @@ const AlbumDetailScreen = ({ album, onBack }: AlbumDetailScreenProps) => {
         </div>
 
         {/* Songs list */}
-        <div className="space-y-2">
-          {album.songs.map((song, index) => (
-            <Card 
-              key={song.id} 
-              onClick={() => handlePlaySong(song)}
-              className={`bg-gray-800 border-gray-700 hover:bg-gray-750 transition-colors cursor-pointer ${
-                playerState.currentSong?.id === song.id ? 'bg-gray-750 border-red-500' : ''
-              }`}
-              tabIndex={0}
-              role="button"
-              aria-label={`Tocar ${song.name}`}
-            >
-              <CardContent className="p-3">
-                <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${
-                    playerState.currentSong?.id === song.id && playerState.isPlaying
-                      ? 'bg-red-500 text-white'
-                      : 'bg-gray-700 text-gray-400'
-                  }`}>
-                    {playerState.currentSong?.id === song.id && playerState.isPlaying ? '♪' : index + 1}
-                  </div>
-                  <div className="flex-1">
-                    <h3 className={`text-sm font-medium ${
-                      playerState.currentSong?.id === song.id ? 'text-red-400' : 'text-white'
+        <div className="flex justify-center">
+          <div className="space-y-2 w-full max-w-3xl"> {/* aumente para max-w-3xl */}
+            {album.songs.map((song, index) => (
+              <Card 
+                key={song.id} 
+                onClick={() => handlePlaySong(song)}
+                className={`bg-gray-800 border-gray-700 hover:bg-gray-750 transition-colors cursor-pointer ${
+                  playerState.currentSong?.id === song.id ? 'bg-gray-750 border-red-500' : ''
+                }`}
+                tabIndex={0}
+                role="button"
+                aria-label={`Tocar ${song.name}`}
+              >
+                <CardContent className="p-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${
+                      playerState.currentSong?.id === song.id && playerState.isPlaying
+                        ? 'bg-red-500 text-white'
+                        : 'bg-gray-700 text-gray-400'
                     }`}>
-                      {song.name.replace(/\.(mp3|opus|m4a|flac|wav)$/i, '')}
-                    </h3>
+                      {playerState.currentSong?.id === song.id && playerState.isPlaying ? '♪' : index + 1}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className={`text-sm font-medium truncate ${
+                        playerState.currentSong?.id === song.id ? 'text-red-400' : 'text-white'
+                      }`}>
+                        {song.name.replace(/\.(mp3|opus|m4a|flac|wav)$/i, '')}
+                      </h3>
+                      {song.artist && (
+                        <p className="text-xs text-gray-400 truncate">{song.artist}</p>
+                      )}
+                    </div>
+                    <div>
+                      <Play className="w-4 h-4 text-gray-400" />
+                    </div>
                   </div>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="text-gray-400 hover:text-white pointer-events-none"
-                    tabIndex={-1}
-                  >
-                    <Play className="w-4 h-4" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
       </div>
     </div>
