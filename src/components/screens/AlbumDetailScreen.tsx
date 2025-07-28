@@ -1,8 +1,9 @@
-import { ArrowLeft, Play, Music } from 'lucide-react';
+import { ArrowLeft, Play, Music, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Album } from '@/services/googleDrive';
 import { useMusicPlayerContext } from '@/contexts/MusicPlayerContext';
+import { useFavorites } from "@/contexts/FavoritesContext";
 
 interface AlbumDetailScreenProps {
   album: Album;
@@ -11,6 +12,7 @@ interface AlbumDetailScreenProps {
 
 const AlbumDetailScreen = ({ album, onBack }: AlbumDetailScreenProps) => {
   const { playSong, playerState } = useMusicPlayerContext();
+  const { favorites, toggleFavorite } = useFavorites();
 
   const handlePlayAlbum = () => {
     if (album.songs.length > 0) {
@@ -75,7 +77,7 @@ const AlbumDetailScreen = ({ album, onBack }: AlbumDetailScreenProps) => {
 
         {/* Songs list */}
         <div className="flex justify-center">
-          <div className="space-y-2 w-full max-w-3xl"> {/* aumente para max-w-3xl */}
+          <div className="space-y-2 w-full max-w-3xl">
             {album.songs.map((song, index) => (
               <Card 
                 key={song.id} 
@@ -106,6 +108,26 @@ const AlbumDetailScreen = ({ album, onBack }: AlbumDetailScreenProps) => {
                         <p className="text-xs text-gray-400 truncate">{song.artist}</p>
                       )}
                     </div>
+                    {/* Botão de coração */}
+                    <button
+                      type="button"
+                      onClick={e => {
+                        e.stopPropagation();
+                        toggleFavorite(song); // Passe o objeto song inteiro
+                      }}
+                      className="ml-2"
+                      aria-label={favorites.some(f => f.id === song.id) ? "Desfavoritar" : "Favoritar"}
+                    >
+                      <Heart
+                        className={`w-5 h-5 transition-colors ${
+                          favorites.some(f => f.id === song.id)
+                            ? "text-red-500 fill-red-500"
+                            : "text-gray-400"
+                        }`}
+                        fill={favorites.some(f => f.id === song.id) ? "currentColor" : "none"}
+                      />
+                    </button>
+                    {/* Botão play (já existente) */}
                     <div>
                       <Play className="w-4 h-4 text-gray-400" />
                     </div>
