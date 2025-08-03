@@ -11,7 +11,7 @@ export const creepbox: AlbumData = {
       title: "Creepbox",
       artist: "Rot",
       trackNumber: 1,
-      duration: "2:54"
+      duration: "4:59"
     },
     {
       id: "1WgJCrPl66KSF1LQV4PUyWvfu11oS79GF",
@@ -88,7 +88,7 @@ export const creepbox: AlbumData = {
       title: "Knuckle Choir",
       artist: "Rot",
       trackNumber: 12,
-      duration: "5:40"
+      duration: "4:38"
     },
     {
       id: "1-LLuK8YowgVgXpl22fklAbQFwWWod1c6",

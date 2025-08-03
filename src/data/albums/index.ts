@@ -26,6 +26,7 @@ import { rootsOfChaos } from './rootsOfChaos';
 import { collapsed } from './collapsed';
 import { riseOfTheShadowSovereign } from './riseOfTheShadowSovereign';
 import { hollowMirror } from './hollowMirror';
+import { quietCollapse } from './quietCollapse';
 
 export const albumsRegistry: AlbumsRegistry = {
   creepbox,
@@ -55,6 +56,7 @@ export const albumsRegistry: AlbumsRegistry = {
   collapsed,
   riseOfTheShadowSovereign,
   hollowMirror,
+  quietCollapse,
 };
 
 export * from './types';
