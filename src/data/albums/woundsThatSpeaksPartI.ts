@@ -1,9 +1,9 @@
-// src/data/albums/woundsThatSpeakPartI.ts
+// src/data/albums/woundsThatSpeaksPartI.ts
 import { AlbumData } from './types';
 
 export const woundsThatSpeaksPartI: AlbumData = {
-  id: "woundsThatSpeakPartI",
-  name: "Wounds That Speak - Part I",
+  id: "woundsThatSpeaksPartI",
+  name: "Wounds That Speaks - Part I",
   coverUrl: "coverUrl",
   tracks: [
     {
