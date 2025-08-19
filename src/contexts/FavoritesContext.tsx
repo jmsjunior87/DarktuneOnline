@@ -16,9 +16,9 @@ type FavoritesContextType = {
 const FavoritesContext = createContext<FavoritesContextType | undefined>(undefined);
 
 export function FavoritesProvider({ children }: { children: ReactNode }) {
-  const [favorites, setFavorites] = useState<FavoriteSong[]>([]);
+  const [favorites, setFavorites] = useState<Song[]>([]);
 
-  const toggleFavorite = (song: FavoriteSong) => {
+  const toggleFavorite = (song: Song) => {
     setFavorites((prev) =>
       prev.some((s) => s.id === song.id)
         ? prev.filter((s) => s.id !== song.id)
