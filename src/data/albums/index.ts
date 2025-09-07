@@ -29,6 +29,7 @@ import { hollowMirror } from './hollowMirror';
 import { quietCollapse } from './quietCollapse';
 import { woundsThatSpeaksPartI } from './woundsThatSpeaksPartI';
 import { woundsThatSpeaksPartIi } from './woundsThatSpeaksPartIi';
+import { theWeightOfAbsence } from './theWeightOfAbsence';
 
 export const albumsRegistry: AlbumsRegistry = {
   creepbox,
@@ -60,7 +61,8 @@ export const albumsRegistry: AlbumsRegistry = {
   hollowMirror,
   quietCollapse,
   woundsThatSpeaksPartI,
-  woundsThatSpeaksPartIi
+  woundsThatSpeaksPartIi,
+  theWeightOfAbsence
 };
 
 export * from './types';
