@@ -30,6 +30,7 @@ import { quietCollapse } from './quietCollapse';
 import { woundsThatSpeaksPartI } from './woundsThatSpeaksPartI';
 import { woundsThatSpeaksPartIi } from './woundsThatSpeaksPartIi';
 import { theWeightOfAbsence } from './theWeightOfAbsence';
+import { unfinished } from './unfinished';
 
 export const albumsRegistry: AlbumsRegistry = {
   creepbox,
@@ -62,7 +63,8 @@ export const albumsRegistry: AlbumsRegistry = {
   quietCollapse,
   woundsThatSpeaksPartI,
   woundsThatSpeaksPartIi,
-  theWeightOfAbsence
+  theWeightOfAbsence,
+  unfinished
 };
 
 export * from './types';
