@@ -31,6 +31,7 @@ import { woundsThatSpeaksPartI } from './woundsThatSpeaksPartI';
 import { woundsThatSpeaksPartIi } from './woundsThatSpeaksPartIi';
 import { theWeightOfAbsence } from './theWeightOfAbsence';
 import { unfinished } from './unfinished';
+import { kin } from './kin';
 
 export const albumsRegistry: AlbumsRegistry = {
   creepbox,
@@ -64,7 +65,8 @@ export const albumsRegistry: AlbumsRegistry = {
   woundsThatSpeaksPartI,
   woundsThatSpeaksPartIi,
   theWeightOfAbsence,
-  unfinished
+  unfinished,
+  kin
 };
 
 export * from './types';
