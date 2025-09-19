@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // src/data/albums/collapsed.ts
 import { AlbumData } from './types';
 
@@ -113,3 +114,14 @@ export const collapsed: AlbumData = {
     },
   ]
 };
+=======
+import { AlbumData } from './types';
+
+export const collapsed: AlbumData = {
+  id: "collapsed-folder-id",
+  name: "Collapsed",
+  tracks: [
+    // Adicione aqui os dados das faixas quando disponíveis
+  ]
+};
+>>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d

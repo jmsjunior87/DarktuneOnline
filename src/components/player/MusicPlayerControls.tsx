@@ -1,10 +1,16 @@
+<<<<<<< HEAD
 import { useEffect } from 'react';
 import { Play, Pause, Volume2, VolumeX, AlertCircle, SkipBack, SkipForward } from 'lucide-react';
+=======
+
+import { Play, Pause, Volume2, VolumeX, AlertCircle } from 'lucide-react';
+>>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { useMusicPlayerContext } from '@/contexts/MusicPlayerContext';
 
 const MusicPlayerControls = () => {
+<<<<<<< HEAD
   const { playerState, togglePlay, setVolume, seekTo, playNext, playPrev } = useMusicPlayerContext();
 
   
@@ -17,6 +23,9 @@ const MusicPlayerControls = () => {
       document.title = "DarkTune";
     }
   }, [playerState.currentSong]);
+=======
+  const { playerState, togglePlay, setVolume, seekTo } = useMusicPlayerContext();
+>>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d
 
   if (!playerState.currentSong) {
     return null;
@@ -37,6 +46,7 @@ const MusicPlayerControls = () => {
   };
 
   return (
+<<<<<<< HEAD
     <div className="bg-gray-800 border-t border-gray-700 p-2 space-y-2">
       {/* Song info + Progress bar na mesma linha */}
       <div className="flex items-center gap-3 w-full max-w-xl mx-auto">
@@ -57,11 +67,29 @@ const MusicPlayerControls = () => {
           )}
           {playerState.error && (
             <div className="flex items-center gap-1 text-[10px] text-red-400">
+=======
+    <div className="bg-gray-800 border-t border-gray-700 p-4 space-y-3">
+      {/* Song info */}
+      <div className="flex items-center gap-3">
+        <div className="w-12 h-12 rounded bg-gray-700 flex items-center justify-center flex-shrink-0">
+          <span className="text-xs text-gray-400">♪</span>
+        </div>
+        <div className="flex-1 min-w-0">
+          <h4 className="text-white text-sm font-medium truncate">
+            {playerState.currentSong.name.replace(/\.(mp3|opus|m4a|flac|wav)$/i, '')}
+          </h4>
+          {playerState.isLoading && (
+            <p className="text-xs text-gray-400">Carregando...</p>
+          )}
+          {playerState.error && (
+            <div className="flex items-center gap-1 text-xs text-red-400">
+>>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d
               <AlertCircle className="w-3 h-3" />
               <span className="truncate">{playerState.error}</span>
             </div>
           )}
         </div>
+<<<<<<< HEAD
         {/* Barra de progresso ocupa o restante */}
         <div className="flex-1 min-w-0">
           <Slider
@@ -120,13 +148,57 @@ const MusicPlayerControls = () => {
             <VolumeX className="w-3 h-3 text-gray-400" />
           ) : (
             <Volume2 className="w-3 h-3 text-gray-400" />
+=======
+      </div>
+
+      {/* Progress bar */}
+      <div className="space-y-2">
+        <Slider
+          value={[playerState.currentTime]}
+          max={playerState.duration || 100}
+          step={1}
+          onValueChange={handleProgressChange}
+          className="w-full"
+          disabled={playerState.error !== null}
+        />
+        <div className="flex justify-between text-xs text-gray-400">
+          <span>{formatTime(playerState.currentTime)}</span>
+          <span>{formatTime(playerState.duration)}</span>
+        </div>
+      </div>
+
+      {/* Controls */}
+      <div className="flex items-center justify-between">
+        <Button
+          onClick={togglePlay}
+          disabled={playerState.isLoading || playerState.error !== null}
+          className="bg-red-500 hover:bg-red-600 text-white disabled:bg-gray-600"
+        >
+          {playerState.isPlaying ? (
+            <Pause className="w-4 h-4" />
+          ) : (
+            <Play className="w-4 h-4" />
+          )}
+        </Button>
+
+        {/* Volume control */}
+        <div className="flex items-center gap-2 flex-1 max-w-32 ml-4">
+          {playerState.volume === 0 ? (
+            <VolumeX className="w-4 h-4 text-gray-400" />
+          ) : (
+            <Volume2 className="w-4 h-4 text-gray-400" />
+>>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d
           )}
           <Slider
             value={[playerState.volume]}
             max={1}
             step={0.01}
             onValueChange={handleVolumeChange}
+<<<<<<< HEAD
             className="flex-1 h-2"
+=======
+            className="flex-1"
+>>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d
           />
         </div>
       </div>

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // src/data/albums/hollowMirror.ts
 import { AlbumData } from './types';
 
@@ -92,3 +93,14 @@ export const hollowMirror: AlbumData = {
     },
   ]
 };
+=======
+import { AlbumData } from './types';
+
+export const hollowMirror: AlbumData = {
+  id: "hollow-mirror-folder-id",
+  name: "Hollow Mirror",
+  tracks: [
+    // Adicione aqui os dados das faixas quando disponíveis
+  ]
+};
+>>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d

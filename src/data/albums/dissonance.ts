@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // src/data/albums/dissonance.ts
 import { AlbumData } from './types';
 
@@ -113,3 +114,14 @@ export const dissonance: AlbumData = {
     },
   ]
 };
+=======
+import { AlbumData } from './types';
+
+export const dissonance: AlbumData = {
+  id: "dissonance-folder-id",
+  name: "Dissonance",
+  tracks: [
+    // Adicione aqui os dados das faixas quando disponíveis
+  ]
+};
+>>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d

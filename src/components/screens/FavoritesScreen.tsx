@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { Heart, Play } from 'lucide-react';
 import { useFavorites } from "@/contexts/FavoritesContext";
 import { Card, CardContent } from '@/components/ui/card';
@@ -7,6 +8,12 @@ const FavoritesScreen = () => {
   const { favorites, toggleFavorite } = useFavorites();
   const { playSong, playerState } = useMusicPlayerContext();
 
+=======
+
+import { Heart } from 'lucide-react';
+
+const FavoritesScreen = () => {
+>>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d
   return (
     <div className="p-4 h-full">
       <div className="flex items-center gap-2 mb-6">
@@ -14,6 +21,7 @@ const FavoritesScreen = () => {
         <h2 className="text-xl font-semibold">Favoritos</h2>
       </div>
       
+<<<<<<< HEAD
       {favorites.length === 0 ? (
         <div className="flex items-center justify-center h-64">
           <div className="text-center text-gray-400">
@@ -80,8 +88,21 @@ const FavoritesScreen = () => {
           </div>
         </div>
       )}
+=======
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center text-gray-400">
+          <Heart className="w-16 h-16 mx-auto mb-4 text-gray-600" />
+          <p className="text-lg mb-2">Nenhuma música favorita</p>
+          <p className="text-sm">Adicione músicas aos favoritos para vê-las aqui</p>
+        </div>
+      </div>
+>>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d
     </div>
   );
 };
 
+<<<<<<< HEAD
 export default FavoritesScreen;
+=======
+export default FavoritesScreen;
+>>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d

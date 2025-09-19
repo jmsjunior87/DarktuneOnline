@@ -121,6 +121,7 @@ const AlbumsScreen = ({ onAlbumSelect }: AlbumsScreenProps) => {
         {searchTerm ? (
           <SearchResults results={searchResults} onAlbumSelect={onAlbumSelect} />
         ) : (
+<<<<<<< HEAD
           <div className="flex justify-center">
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 max-w-5xl w-full">
               {filteredAlbums.map((album) => (
@@ -157,6 +158,42 @@ const AlbumsScreen = ({ onAlbumSelect }: AlbumsScreenProps) => {
                 </Card>
               ))}
             </div>
+=======
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            {filteredAlbums.map((album) => (
+              <Card 
+                key={album.id} 
+                className="bg-gray-800 border-gray-700 hover:bg-gray-750 transition-colors cursor-pointer"
+                onClick={() => onAlbumSelect(album)}
+              >
+                <CardContent className="p-3">
+                  <div className="aspect-square mb-3 rounded-lg overflow-hidden bg-gray-700">
+                    {album.coverUrl ? (
+                      <img 
+                        src={album.coverUrl} 
+                        alt={album.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          console.log('Erro ao carregar capa do álbum:', album.name, album.coverUrl);
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Music className="w-8 h-8 text-gray-500" />
+                      </div>
+                    )}
+                  </div>
+                  <h3 className="font-medium text-sm text-white mb-1 truncate">
+                    {album.name}
+                  </h3>
+                  <p className="text-xs text-gray-400">
+                    {album.songs.length} música{album.songs.length !== 1 ? 's' : ''}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+>>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d
           </div>
         )}
       </div>

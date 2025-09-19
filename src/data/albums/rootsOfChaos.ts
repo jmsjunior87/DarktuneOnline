@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // src/data/albums/rootsOfChaos.ts
 import { AlbumData } from './types';
 
@@ -120,3 +121,14 @@ export const rootsOfChaos: AlbumData = {
     },
   ]
 };
+=======
+import { AlbumData } from './types';
+
+export const rootsOfChaos: AlbumData = {
+  id: "roots-of-chaos-folder-id",
+  name: "Roots of Chaos",
+  tracks: [
+    // Adicione aqui os dados das faixas quando disponíveis
+  ]
+};
+>>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d

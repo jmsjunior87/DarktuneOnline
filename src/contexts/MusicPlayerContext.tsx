@@ -7,8 +7,11 @@ interface MusicPlayerContextType {
   playerState: PlayerState;
   playSong: (song: Song, playlist?: Song[]) => void;
   pauseSong: () => void;
+<<<<<<< HEAD
   playNext: () => void;
   playPrev: () => void;
+=======
+>>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d
   togglePlay: () => void;
   setVolume: (volume: number) => void;
   seekTo: (time: number) => void;

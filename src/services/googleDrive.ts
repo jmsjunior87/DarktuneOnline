@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+
+>>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d
 import { albumsRegistry } from '@/data/albums';
 
 export interface DriveFile {
@@ -31,6 +35,7 @@ export class GoogleDriveService {
   private baseUrl = 'https://www.googleapis.com/drive/v3';
   private apiKey = 'AIzaSyD8zoU0KerJB_4cXBMpjbS_jNkxJnSjgNM';
   private albumsFolderId = '10L4y3OqfXgMbC043uP0nKMHQ5iqMHj5b';
+<<<<<<< HEAD
   private blobCache: Record<string, string> = {};
 
   public clearBlobCache(fileId: string) {
@@ -38,6 +43,8 @@ export class GoogleDriveService {
       delete this.blobCache[fileId];
     }
   }
+=======
+>>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d
 
   static getInstance(): GoogleDriveService {
     if (!GoogleDriveService.instance) {
@@ -60,6 +67,7 @@ export class GoogleDriveService {
     return response.json();
   }
 
+<<<<<<< HEAD
   // Alterado: download do arquivo via proxy backend
   async downloadFileAsBlob(fileId: string): Promise<string> {
   // Verifica se já existe no cache
@@ -87,6 +95,45 @@ export class GoogleDriveService {
       }
     } catch (error) {
       console.error('❌ Erro ao baixar arquivo via proxy:', error);
+=======
+  // Nova abordagem: download do arquivo para blob e criação de URL local
+  async downloadFileAsBlob(fileId: string): Promise<string> {
+    console.log('📥 Baixando arquivo para reprodução local:', fileId);
+    
+    try {
+      // Tenta diferentes URLs de download
+      const downloadUrls = [
+        `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${this.apiKey}`,
+        `https://drive.google.com/uc?export=download&id=${fileId}`,
+      ];
+
+      for (const url of downloadUrls) {
+        try {
+          console.log('🔗 Tentando baixar de:', url);
+          
+          const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+              'Range': 'bytes=0-' // Permite streaming parcial
+            }
+          });
+
+          if (response.ok) {
+            const blob = await response.blob();
+            const audioUrl = URL.createObjectURL(blob);
+            console.log('✅ Arquivo baixado com sucesso, URL local criada');
+            return audioUrl;
+          }
+        } catch (error) {
+          console.log('⚠️ Falha no download, tentando próxima URL...', error);
+          continue;
+        }
+      }
+      
+      throw new Error('Não foi possível baixar o arquivo');
+    } catch (error) {
+      console.error('❌ Erro ao baixar arquivo:', error);
+>>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d
       throw error;
     }
   }
@@ -223,4 +270,8 @@ export class GoogleDriveService {
     const coverNames = ['cover.jpg', 'cover.jpeg', 'cover.png', 'album.jpg', 'album.jpeg', 'album.png'];
     return coverNames.includes(filename.toLowerCase());
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // src/data/albums/stillHere.ts
 import { AlbumData } from './types';
 
@@ -127,3 +128,14 @@ export const stillHere: AlbumData = {
     },
   ]
 };
+=======
+import { AlbumData } from './types';
+
+export const stillHere: AlbumData = {
+  id: "still-here-folder-id",
+  name: "Still Here",
+  tracks: [
+    // Adicione aqui os dados das faixas quando disponíveis
+  ]
+};
+>>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // src/data/albums/hollowCurrent.ts
 import { AlbumData } from './types';
 
@@ -85,3 +86,14 @@ export const hollowCurrent: AlbumData = {
     },
   ]
 };
+=======
+import { AlbumData } from './types';
+
+export const hollowCurrent: AlbumData = {
+  id: "hollow-current-folder-id",
+  name: "Hollow Current",
+  tracks: [
+    // Adicione aqui os dados das faixas quando disponíveis
+  ]
+};
+>>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d

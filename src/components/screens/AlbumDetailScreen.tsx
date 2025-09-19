@@ -1,9 +1,16 @@
+<<<<<<< HEAD
 import { ArrowLeft, Play, Music, Heart } from 'lucide-react';
+=======
+import { ArrowLeft, Play, Music } from 'lucide-react';
+>>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Album } from '@/services/googleDrive';
 import { useMusicPlayerContext } from '@/contexts/MusicPlayerContext';
+<<<<<<< HEAD
 import { useFavorites } from "@/contexts/FavoritesContext";
+=======
+>>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d
 
 interface AlbumDetailScreenProps {
   album: Album;
@@ -12,7 +19,10 @@ interface AlbumDetailScreenProps {
 
 const AlbumDetailScreen = ({ album, onBack }: AlbumDetailScreenProps) => {
   const { playSong, playerState } = useMusicPlayerContext();
+<<<<<<< HEAD
   const { favorites, toggleFavorite } = useFavorites();
+=======
+>>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d
 
   const handlePlayAlbum = () => {
     if (album.songs.length > 0) {
@@ -76,6 +86,7 @@ const AlbumDetailScreen = ({ album, onBack }: AlbumDetailScreenProps) => {
         </div>
 
         {/* Songs list */}
+<<<<<<< HEAD
         <div className="flex justify-center">
           <div className="space-y-2 w-full max-w-3xl">
             {album.songs.map((song, index) => (
@@ -136,10 +147,52 @@ const AlbumDetailScreen = ({ album, onBack }: AlbumDetailScreenProps) => {
               </Card>
             ))}
           </div>
+=======
+        <div className="space-y-2">
+          {album.songs.map((song, index) => (
+            <Card 
+              key={song.id} 
+              className={`bg-gray-800 border-gray-700 hover:bg-gray-750 transition-colors cursor-pointer ${
+                playerState.currentSong?.id === song.id ? 'bg-gray-750 border-red-500' : ''
+              }`}
+            >
+              <CardContent className="p-3">
+                <div className="flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${
+                    playerState.currentSong?.id === song.id && playerState.isPlaying
+                      ? 'bg-red-500 text-white'
+                      : 'bg-gray-700 text-gray-400'
+                  }`}>
+                    {playerState.currentSong?.id === song.id && playerState.isPlaying ? '♪' : index + 1}
+                  </div>
+                  <div className="flex-1">
+                    <h3 className={`text-sm font-medium ${
+                      playerState.currentSong?.id === song.id ? 'text-red-400' : 'text-white'
+                    }`}>
+                      {song.name.replace(/\.(mp3|opus|m4a|flac|wav)$/i, '')}
+                    </h3>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="text-gray-400 hover:text-white"
+                    onClick={() => handlePlaySong(song)}
+                  >
+                    <Play className="w-4 h-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+>>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d
         </div>
       </div>
     </div>
   );
 };
 
+<<<<<<< HEAD
 export default AlbumDetailScreen;
+=======
+export default AlbumDetailScreen;
+>>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // src/data/albums/eroded.ts
 import { AlbumData } from './types';
 
@@ -113,3 +114,14 @@ export const eroded: AlbumData = {
     },
   ]
 };
+=======
+import { AlbumData } from './types';
+
+export const eroded: AlbumData = {
+  id: "eroded-folder-id",
+  name: "Eroded",
+  tracks: [
+    // Adicione aqui os dados das faixas quando disponíveis
+  ]
+};
+>>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d

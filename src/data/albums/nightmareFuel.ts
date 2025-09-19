@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // src/data/albums/nightmareFuel.ts
 import { AlbumData } from './types';
 
@@ -113,3 +114,14 @@ export const nightmareFuel: AlbumData = {
     },
   ]
 };
+=======
+import { AlbumData } from './types';
+
+export const nightmareFuel: AlbumData = {
+  id: "nightmare-fuel-folder-id",
+  name: "Nightmare Fuel",
+  tracks: [
+    // Adicione aqui os dados das faixas quando disponíveis
+  ]
+};
+>>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d
