@@ -1,8 +1,6 @@
 import { AlbumsRegistry } from './types';
-<<<<<<< HEAD
+
 import { creepbox } from './creepbox';
-=======
->>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d
 import { deranged } from './deranged';
 import { descent } from './descent';
 import { stillHere } from './stillHere';
@@ -11,13 +9,9 @@ import { resonance } from './resonance';
 import { faded } from './faded';
 import { distorted } from './distorted';
 import { dissonance } from './dissonance';
-<<<<<<< HEAD
-import { pale } from './epPale';
 import { unspoken } from './singleUnspoken';
-=======
 import { epPale } from './epPale';
 import { singleUnspoken } from './singleUnspoken';
->>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d
 import { remnant } from './remnant';
 import { nightmareFuel } from './nightmareFuel';
 import { eroded } from './eroded';
@@ -34,21 +28,17 @@ import { rootsOfChaos } from './rootsOfChaos';
 import { collapsed } from './collapsed';
 import { riseOfTheShadowSovereign } from './riseOfTheShadowSovereign';
 import { hollowMirror } from './hollowMirror';
-<<<<<<< HEAD
 import { quietCollapse } from './quietCollapse';
 import { woundsThatSpeaksPartI } from './woundsThatSpeaksPartI';
 import { woundsThatSpeaksPartIi } from './woundsThatSpeaksPartIi';
 import { theWeightOfAbsence } from './theWeightOfAbsence';
 import { unfinished } from './unfinished';
 import { kin } from './kin';
+import { severance } from './severance'; 
 
 export const albumsRegistry: AlbumsRegistry = {
-  creepbox,
-=======
-
-export const albumsRegistry: AlbumsRegistry = {
->>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d
   deranged,
+  creepbox,
   descent,
   stillHere,
   revenant,
@@ -56,13 +46,9 @@ export const albumsRegistry: AlbumsRegistry = {
   faded,
   distorted,
   dissonance,
-<<<<<<< HEAD
-  pale,
   unspoken,
-=======
   epPale,
   singleUnspoken,
->>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d
   remnant,
   nightmareFuel,
   eroded,
@@ -79,15 +65,13 @@ export const albumsRegistry: AlbumsRegistry = {
   collapsed,
   riseOfTheShadowSovereign,
   hollowMirror,
-<<<<<<< HEAD
   quietCollapse,
   woundsThatSpeaksPartI,
   woundsThatSpeaksPartIi,
   theWeightOfAbsence,
   unfinished,
-  kin
-=======
->>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d
+  kin,
+  severance
 };
 
 export * from './types';
