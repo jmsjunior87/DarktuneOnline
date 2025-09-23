@@ -1,10 +1,9 @@
-<<<<<<< HEAD
 // src/data/albums/pale.ts
 import { AlbumData } from './types';
 
-export const pale: AlbumData = {
-  id: "pale",
-  name: "Pale",
+export const epPale: AlbumData = {
+  id: "epPale",
+  name: "epPale",
   coverUrl: "coverUrl",
   tracks: [
     {
@@ -44,14 +43,3 @@ export const pale: AlbumData = {
     },
   ]
 };
-=======
-import { AlbumData } from './types';
-
-export const epPale: AlbumData = {
-  id: "ep-pale-folder-id",
-  name: "EP Pale",
-  tracks: [
-    // Adicione aqui os dados das faixas quando disponíveis
-  ]
-};
->>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d

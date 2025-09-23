@@ -9,7 +9,6 @@ import { resonance } from './resonance';
 import { faded } from './faded';
 import { distorted } from './distorted';
 import { dissonance } from './dissonance';
-import { unspoken } from './singleUnspoken';
 import { epPale } from './epPale';
 import { singleUnspoken } from './singleUnspoken';
 import { remnant } from './remnant';
@@ -46,7 +45,6 @@ export const albumsRegistry: AlbumsRegistry = {
   faded,
   distorted,
   dissonance,
-  unspoken,
   epPale,
   singleUnspoken,
   remnant,
