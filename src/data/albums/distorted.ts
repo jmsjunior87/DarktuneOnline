@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 // src/data/albums/distorted.ts
 import { AlbumData } from './types';
 
@@ -79,14 +78,3 @@ export const distorted: AlbumData = {
     },
   ]
 };
-=======
-import { AlbumData } from './types';
-
-export const distorted: AlbumData = {
-  id: "distorted-folder-id",
-  name: "Distorted",
-  tracks: [
-    // Adicione aqui os dados das faixas quando disponíveis
-  ]
-};
->>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d

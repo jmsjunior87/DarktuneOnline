@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 // src/data/albums/resonance.ts
 import { AlbumData } from './types';
 
@@ -6,13 +5,6 @@ export const resonance: AlbumData = {
   id: "resonance",
   name: "Resonance",
   coverUrl: "coverUrl",
-=======
-import { AlbumData } from './types';
-
-export const resonance: AlbumData = {
-  id: "resonance-folder-id",
-  name: "Resonance",
->>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d
   tracks: [
     {
       id: "1eSPG7uViFaB9N3SN1xIPQ2AYZoocG79y",
@@ -29,7 +21,6 @@ export const resonance: AlbumData = {
       duration: "3:00"
     },
     {
-<<<<<<< HEAD
       id: "1dMQqJso23ymBQODhZnbBh-N5Y6MLornM",
       title: "Shattered Sun",
       artist: "Rot",
@@ -129,13 +120,3 @@ export const resonance: AlbumData = {
     },
   ]
 };
-=======
-      id: "example-id-3",
-      title: "Track 3",
-      artist: "Rot", 
-      trackNumber: 3,
-      duration: "2:45"
-    }
-  ]
-};
->>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d

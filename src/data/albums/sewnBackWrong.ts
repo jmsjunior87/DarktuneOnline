@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 // src/data/albums/sewnBackWrong.ts
 import { AlbumData } from './types';
 
@@ -93,14 +92,3 @@ export const sewnBackWrong: AlbumData = {
     },
   ]
 };
-=======
-import { AlbumData } from './types';
-
-export const sewnBackWrong: AlbumData = {
-  id: "sewn-back-wrong-folder-id",
-  name: "Sewn Back Wrong",
-  tracks: [
-    // Adicione aqui os dados das faixas quando disponíveis
-  ]
-};
->>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d

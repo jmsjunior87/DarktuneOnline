@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 // src/data/albums/sundered.ts
 import { AlbumData } from './types';
 
@@ -86,14 +85,3 @@ export const sundered: AlbumData = {
     },
   ]
 };
-=======
-import { AlbumData } from './types';
-
-export const sundered: AlbumData = {
-  id: "sundered-folder-id",
-  name: "Sundered",
-  tracks: [
-    // Adicione aqui os dados das faixas quando disponíveis
-  ]
-};
->>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d

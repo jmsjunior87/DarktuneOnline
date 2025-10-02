@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 // src/data/albums/unliveable.ts
 import { AlbumData } from './types';
 
@@ -100,14 +99,3 @@ export const unliveable: AlbumData = {
     },
   ]
 };
-=======
-import { AlbumData } from './types';
-
-export const unliveable: AlbumData = {
-  id: "unliveable-folder-id",
-  name: "Unliveable",
-  tracks: [
-    // Adicione aqui os dados das faixas quando disponíveis
-  ]
-};
->>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d

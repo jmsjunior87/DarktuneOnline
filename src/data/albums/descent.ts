@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 // src/data/albums/descent.ts
 import { AlbumData } from './types';
 
@@ -135,14 +134,3 @@ export const descent: AlbumData = {
     },
   ]
 };
-=======
-import { AlbumData } from './types';
-
-export const descent: AlbumData = {
-  id: "descent-folder-id",
-  name: "Descent",
-  tracks: [
-    // Adicione aqui os dados das faixas quando disponíveis
-  ]
-};
->>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d

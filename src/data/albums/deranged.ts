@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 // src/data/albums/deranged.ts
 import { AlbumData } from './types';
 
@@ -142,22 +141,3 @@ export const deranged: AlbumData = {
     },
   ]
 };
-=======
-import { AlbumData } from './types';
-
-export const deranged: AlbumData = {
-  id: "deranged-folder-id",
-  name: "Deranged",
-  tracks: [
-    // Adicione aqui os dados das faixas quando disponíveis
-    // Exemplo:
-    // {
-    //   id: "google-drive-file-id",
-    //   title: "Track Name",
-    //   artist: "Artist Name",
-    //   trackNumber: 1,
-    //   duration: "3:17"
-    // }
-  ]
-};
->>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d

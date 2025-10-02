@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 // src/data/albums/nothingLeft.ts
 import { AlbumData } from './types';
 
@@ -170,14 +169,3 @@ export const nothingLeft: AlbumData = {
     },
   ]
 };
-=======
-import { AlbumData } from './types';
-
-export const nothingLeft: AlbumData = {
-  id: "nothing-left-folder-id",
-  name: "Nothing Left",
-  tracks: [
-    // Adicione aqui os dados das faixas quando disponíveis
-  ]
-};
->>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d

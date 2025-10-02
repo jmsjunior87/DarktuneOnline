@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 // src/data/albums/filthkeeper.ts
 import { AlbumData } from './types';
 
@@ -79,14 +78,3 @@ export const filthkeeper: AlbumData = {
     },
   ]
 };
-=======
-import { AlbumData } from './types';
-
-export const filthkeeper: AlbumData = {
-  id: "filthkeeper-folder-id",
-  name: "Filthkeeper",
-  tracks: [
-    // Adicione aqui os dados das faixas quando disponíveis
-  ]
-};
->>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d

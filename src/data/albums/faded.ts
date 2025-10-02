@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 // src/data/albums/faded.ts
 import { AlbumData } from './types';
 
@@ -100,14 +99,3 @@ export const faded: AlbumData = {
     },
   ]
 };
-=======
-import { AlbumData } from './types';
-
-export const faded: AlbumData = {
-  id: "faded-folder-id",
-  name: "Faded",
-  tracks: [
-    // Adicione aqui os dados das faixas quando disponíveis
-  ]
-};
->>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d
