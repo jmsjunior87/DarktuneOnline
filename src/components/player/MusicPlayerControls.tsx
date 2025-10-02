@@ -1,19 +1,12 @@
-<<<<<<< HEAD
 import { useEffect } from 'react';
-import { Play, Pause, Volume2, VolumeX, AlertCircle, SkipBack, SkipForward } from 'lucide-react';
-=======
-
-import { Play, Pause, Volume2, VolumeX, AlertCircle } from 'lucide-react';
->>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d
+import { Play, Pause, Volume2, VolumeX, AlertCircle, SkipBack, SkipForward, Music } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { useMusicPlayerContext } from '@/contexts/MusicPlayerContext';
 
 const MusicPlayerControls = () => {
-<<<<<<< HEAD
   const { playerState, togglePlay, setVolume, seekTo, playNext, playPrev } = useMusicPlayerContext();
 
-  
   useEffect(() => {
     if (playerState.currentSong) {
       const songName = playerState.currentSong.name.replace(/\.(mp3|opus|m4a|flac|wav)$/i, '');
@@ -23,9 +16,6 @@ const MusicPlayerControls = () => {
       document.title = "DarkTune";
     }
   }, [playerState.currentSong]);
-=======
-  const { playerState, togglePlay, setVolume, seekTo } = useMusicPlayerContext();
->>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d
 
   if (!playerState.currentSong) {
     return null;
@@ -46,159 +36,98 @@ const MusicPlayerControls = () => {
   };
 
   return (
-<<<<<<< HEAD
-    <div className="bg-gray-800 border-t border-gray-700 p-2 space-y-2">
-      {/* Song info + Progress bar na mesma linha */}
-      <div className="flex items-center gap-3 w-full max-w-xl mx-auto">
-        {/* Quadrado (imagem ou ícone) */}
-        <div className="w-8 h-8 rounded bg-gray-700 flex items-center justify-center flex-shrink-0">
-          <span className="text-xs text-gray-400">♪</span>
+    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[95vw] max-w-4xl rounded-xl shadow-lg backdrop-blur-md bg-black/60 border border-gray-700 px-6 py-3 z-50 flex items-center gap-6">
+      {/* Miniatura + info (esquerda) */}
+      <div className="flex items-center gap-3 min-w-0 flex-shrink-0 w-1/3">
+        <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-700 flex-shrink-0 flex items-center justify-center">
+          {playerState.currentSong.coverUrl ? (
+            <img
+              src={playerState.currentSong.coverUrl}
+              alt={playerState.currentSong.name}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <Music className="w-6 h-6 text-gray-400" />
+          )}
         </div>
-        {/* Título/artista */}
-        <div className="min-w-0 flex-shrink-0">
-          <h4 className="text-white text-xs font-medium truncate max-w-[140px]">
+        <div className="min-w-0">
+          <h4 className="text-white text-sm font-medium truncate max-w-[160px]">
             {playerState.currentSong.name.replace(/\.(mp3|opus|m4a|flac|wav)$/i, '')}
             {playerState.currentSong.artist && (
               <span className="text-gray-400"> - {playerState.currentSong.artist}</span>
             )}
           </h4>
           {playerState.isLoading && (
-            <p className="text-[10px] text-gray-400">Carregando...</p>
-          )}
-          {playerState.error && (
-            <div className="flex items-center gap-1 text-[10px] text-red-400">
-=======
-    <div className="bg-gray-800 border-t border-gray-700 p-4 space-y-3">
-      {/* Song info */}
-      <div className="flex items-center gap-3">
-        <div className="w-12 h-12 rounded bg-gray-700 flex items-center justify-center flex-shrink-0">
-          <span className="text-xs text-gray-400">♪</span>
-        </div>
-        <div className="flex-1 min-w-0">
-          <h4 className="text-white text-sm font-medium truncate">
-            {playerState.currentSong.name.replace(/\.(mp3|opus|m4a|flac|wav)$/i, '')}
-          </h4>
-          {playerState.isLoading && (
             <p className="text-xs text-gray-400">Carregando...</p>
           )}
           {playerState.error && (
             <div className="flex items-center gap-1 text-xs text-red-400">
->>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d
               <AlertCircle className="w-3 h-3" />
               <span className="truncate">{playerState.error}</span>
             </div>
           )}
         </div>
-<<<<<<< HEAD
-        {/* Barra de progresso ocupa o restante */}
-        <div className="flex-1 min-w-0">
-          <Slider
-            value={[playerState.currentTime]}
-            max={playerState.duration || 100}
-            step={1}
-            onValueChange={handleProgressChange}
-            className="w-full h-2"
-            disabled={playerState.error !== null}
-          />
-          <div className="flex justify-between text-[10px] text-gray-400">
-            <span>{formatTime(playerState.currentTime)}</span>
-            <span>{formatTime(playerState.duration)}</span>
-          </div>
-        </div>
       </div>
 
-      {/* Controls centered, volume right */}
-      <div className="flex items-center justify-between gap-2">
-        {/* Centraliza os controles */}
-        <div className="flex-1 flex justify-center">
-          <div className="flex items-center gap-2">
-            <Button
-              onClick={playPrev}
-              disabled={playerState.isLoading || playerState.error !== null}
-              className="bg-gray-700 hover:bg-gray-600 text-white disabled:bg-gray-600 p-1 h-7 w-7"
-              aria-label="Anterior"
-            >
-              <SkipBack className="w-3 h-3" />
-            </Button>
-            <Button
-              onClick={togglePlay}
-              disabled={playerState.isLoading || playerState.error !== null}
-              className="bg-red-500 hover:bg-red-600 text-white disabled:bg-gray-600 p-1 h-8 w-8"
-              aria-label="Play/Pause"
-            >
-              {playerState.isPlaying ? (
-                <Pause className="w-4 h-4" />
-              ) : (
-                <Play className="w-4 h-4" />
-              )}
-            </Button>
-            <Button
-              onClick={playNext}
-              disabled={playerState.isLoading || playerState.error !== null}
-              className="bg-gray-700 hover:bg-gray-600 text-white disabled:bg-gray-600 p-1 h-7 w-7"
-              aria-label="Próxima"
-            >
-              <SkipForward className="w-3 h-3" />
-            </Button>
-          </div>
-        </div>
-        {/* Volume control alinhado à direita */}
-        <div className="flex items-center gap-1 max-w-24 w-full justify-end">
-          {playerState.volume === 0 ? (
-            <VolumeX className="w-3 h-3 text-gray-400" />
-          ) : (
-            <Volume2 className="w-3 h-3 text-gray-400" />
-=======
-      </div>
-
-      {/* Progress bar */}
-      <div className="space-y-2">
+      {/* Barra de progresso centralizada */}
+      <div className="flex-1 flex flex-col items-center justify-center px-4">
         <Slider
           value={[playerState.currentTime]}
           max={playerState.duration || 100}
           step={1}
           onValueChange={handleProgressChange}
-          className="w-full"
+          className="w-full h-2"
           disabled={playerState.error !== null}
         />
-        <div className="flex justify-between text-xs text-gray-400">
+        <div className="flex justify-between w-full text-xs text-gray-400 mt-1">
           <span>{formatTime(playerState.currentTime)}</span>
           <span>{formatTime(playerState.duration)}</span>
         </div>
       </div>
 
-      {/* Controls */}
-      <div className="flex items-center justify-between">
+      {/* Controles (direita) */}
+      <div className="flex items-center gap-2 flex-shrink-0">
+        <Button
+          onClick={playPrev}
+          disabled={playerState.isLoading || playerState.error !== null}
+          className="bg-gray-700 hover:bg-gray-600 text-white disabled:bg-gray-600 p-1 h-8 w-8"
+          aria-label="Anterior"
+        >
+          <SkipBack className="w-4 h-4" />
+        </Button>
         <Button
           onClick={togglePlay}
           disabled={playerState.isLoading || playerState.error !== null}
-          className="bg-red-500 hover:bg-red-600 text-white disabled:bg-gray-600"
+          className="bg-red-500 hover:bg-red-600 text-white disabled:bg-gray-600 p-1 h-10 w-10"
+          aria-label="Play/Pause"
         >
           {playerState.isPlaying ? (
-            <Pause className="w-4 h-4" />
+            <Pause className="w-5 h-5" />
           ) : (
-            <Play className="w-4 h-4" />
+            <Play className="w-5 h-5" />
           )}
         </Button>
-
-        {/* Volume control */}
-        <div className="flex items-center gap-2 flex-1 max-w-32 ml-4">
+        <Button
+          onClick={playNext}
+          disabled={playerState.isLoading || playerState.error !== null}
+          className="bg-gray-700 hover:bg-gray-600 text-white disabled:bg-gray-600 p-1 h-8 w-8"
+          aria-label="Próxima"
+        >
+          <SkipForward className="w-4 h-4" />
+        </Button>
+        {/* Controle de volume */}
+        <div className="flex items-center gap-2 ml-4 w-24">
           {playerState.volume === 0 ? (
-            <VolumeX className="w-4 h-4 text-gray-400" />
+            <VolumeX className="w-5 h-5 text-gray-400" />
           ) : (
-            <Volume2 className="w-4 h-4 text-gray-400" />
->>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d
+            <Volume2 className="w-5 h-5 text-gray-400" />
           )}
           <Slider
             value={[playerState.volume]}
             max={1}
             step={0.01}
             onValueChange={handleVolumeChange}
-<<<<<<< HEAD
-            className="flex-1 h-2"
-=======
-            className="flex-1"
->>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d
+            className="w-16 h-2"
           />
         </div>
       </div>

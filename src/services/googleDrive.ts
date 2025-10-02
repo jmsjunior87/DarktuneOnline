@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-
->>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d
 import { albumsRegistry } from '@/data/albums';
 
 export interface DriveFile {
@@ -26,8 +22,10 @@ export interface Song {
   albumId: string;
   albumName?: string;
   artist?: string;
+  coverUrl?: string;
   trackNumber?: number;
   duration?: string;
+  // coverUrl?: string; // Se quiser, pode adicionar aqui para cada música
 }
 
 export class GoogleDriveService {
@@ -35,7 +33,6 @@ export class GoogleDriveService {
   private baseUrl = 'https://www.googleapis.com/drive/v3';
   private apiKey = 'AIzaSyD8zoU0KerJB_4cXBMpjbS_jNkxJnSjgNM';
   private albumsFolderId = '10L4y3OqfXgMbC043uP0nKMHQ5iqMHj5b';
-<<<<<<< HEAD
   private blobCache: Record<string, string> = {};
 
   public clearBlobCache(fileId: string) {
@@ -43,8 +40,6 @@ export class GoogleDriveService {
       delete this.blobCache[fileId];
     }
   }
-=======
->>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d
 
   static getInstance(): GoogleDriveService {
     if (!GoogleDriveService.instance) {
@@ -67,41 +62,36 @@ export class GoogleDriveService {
     return response.json();
   }
 
-<<<<<<< HEAD
-  // Alterado: download do arquivo via proxy backend
+  // Download do arquivo via proxy backend OU fallback direto do Google Drive
   async downloadFileAsBlob(fileId: string): Promise<string> {
-  // Verifica se já existe no cache
-  if (this.blobCache[fileId]) {
-    return this.blobCache[fileId];
-  }
+    // Verifica se já existe no cache
+    if (this.blobCache[fileId]) {
+      return this.blobCache[fileId];
+    }
 
+    // Tenta baixar via proxy
     try {
-      // Use apenas o endpoint do seu backend proxy
       const proxyUrl = `https://darktuneonline.onrender.com/api/drive/${fileId}`;
-
       const response = await fetch(proxyUrl, {
         method: 'GET',
         headers: {
-          'Range': 'bytes=0-' // Permite streaming parcial
+          'Range': 'bytes=0-'
         }
       });
 
       if (response.ok) {
         const blob = await response.blob();
         const audioUrl = URL.createObjectURL(blob);
-        this.blobCache[fileId] = audioUrl; // <-- ADICIONE ESTA LINHA
+        this.blobCache[fileId] = audioUrl;
         console.log('✅ Arquivo baixado com sucesso via proxy, URL local criada');
         return audioUrl;
       }
     } catch (error) {
       console.error('❌ Erro ao baixar arquivo via proxy:', error);
-=======
-  // Nova abordagem: download do arquivo para blob e criação de URL local
-  async downloadFileAsBlob(fileId: string): Promise<string> {
-    console.log('📥 Baixando arquivo para reprodução local:', fileId);
-    
+    }
+
+    // Fallback: download direto do Google Drive
     try {
-      // Tenta diferentes URLs de download
       const downloadUrls = [
         `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${this.apiKey}`,
         `https://drive.google.com/uc?export=download&id=${fileId}`,
@@ -110,17 +100,18 @@ export class GoogleDriveService {
       for (const url of downloadUrls) {
         try {
           console.log('🔗 Tentando baixar de:', url);
-          
+
           const response = await fetch(url, {
             method: 'GET',
             headers: {
-              'Range': 'bytes=0-' // Permite streaming parcial
+              'Range': 'bytes=0-'
             }
           });
 
           if (response.ok) {
             const blob = await response.blob();
             const audioUrl = URL.createObjectURL(blob);
+            this.blobCache[fileId] = audioUrl;
             console.log('✅ Arquivo baixado com sucesso, URL local criada');
             return audioUrl;
           }
@@ -129,11 +120,10 @@ export class GoogleDriveService {
           continue;
         }
       }
-      
+
       throw new Error('Não foi possível baixar o arquivo');
     } catch (error) {
       console.error('❌ Erro ao baixar arquivo:', error);
->>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d
       throw error;
     }
   }
@@ -141,14 +131,12 @@ export class GoogleDriveService {
   async getAlbumFolders(): Promise<DriveFile[]> {
     const query = `'${this.albumsFolderId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`;
     const response = await this.makeRequest(`/files?q=${encodeURIComponent(query)}`);
-    
     return response.files;
   }
 
   async getFilesInFolder(folderId: string): Promise<DriveFile[]> {
     const query = `'${folderId}' in parents and trashed=false`;
     const response = await this.makeRequest(`/files?q=${encodeURIComponent(query)}&fields=files(id,name,mimeType,webContentLink)`);
-    
     return response.files;
   }
 
@@ -165,7 +153,7 @@ export class GoogleDriveService {
 
   async getAlbums(): Promise<Album[]> {
     console.log('🎵 Carregando álbuns do arquivo local...');
-    
+
     const albumFolders = await this.getAlbumFolders();
     console.log('📂 Pastas de álbuns encontradas:', albumFolders.length);
 
@@ -173,20 +161,20 @@ export class GoogleDriveService {
 
     for (const folder of albumFolders) {
       console.log('🎼 Processando álbum:', folder.name);
-      
+
       // Buscar dados do álbum no registry local
-      const albumKey = Object.keys(albumsRegistry).find(key => 
+      const albumKey = Object.keys(albumsRegistry).find(key =>
         albumsRegistry[key].name === folder.name
       );
-      
+
       if (albumKey) {
         const albumData = albumsRegistry[albumKey];
         console.log('📋 Dados do álbum encontrados no registry:', albumData.name);
-        
+
         // Buscar arquivos no Google Drive para validar e obter IDs reais
         const files = await this.getFilesInFolder(folder.id);
         let coverUrl: string | undefined;
-        
+
         // Procurar por capa
         for (const file of files) {
           if (this.isCoverFile(file.name)) {
@@ -195,7 +183,7 @@ export class GoogleDriveService {
             break;
           }
         }
-        
+
         // Usar dados do registry para criar as músicas
         const songs: Song[] = albumData.tracks.map(track => ({
           id: track.id,
@@ -214,23 +202,23 @@ export class GoogleDriveService {
           coverUrl: coverUrl || `https://drive.google.com/thumbnail?id=${folder.id}&sz=w400-h400`,
           songs
         });
-        
+
         console.log(`✅ Álbum "${folder.name}" adicionado com ${songs.length} música(s) do registry`);
       } else {
         // Fallback: usar método antigo
         console.log('📋 Fallback: usando arquivos de áudio encontrados');
         const files = await this.getFilesInFolder(folder.id);
-        
+
         const songs: Song[] = [];
         let coverUrl: string | undefined;
 
         for (const file of files) {
           if (this.isAudioFile(file.name)) {
             console.log('🎵 Arquivo de áudio encontrado:', file.name);
-            
+
             const artist = this.extractArtistFromFilename(file.name);
             const cleanName = this.cleanSongName(file.name);
-            
+
             songs.push({
               id: file.id,
               name: cleanName || file.name,
@@ -270,8 +258,4 @@ export class GoogleDriveService {
     const coverNames = ['cover.jpg', 'cover.jpeg', 'cover.png', 'album.jpg', 'album.jpeg', 'album.png'];
     return coverNames.includes(filename.toLowerCase());
   }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 82471daca1659d5ebacd200a247d7f245dc4635d
