@@ -33,7 +33,9 @@ import { woundsThatSpeaksPartIi } from './woundsThatSpeaksPartIi';
 import { theWeightOfAbsence } from './theWeightOfAbsence';
 import { unfinished } from './unfinished';
 import { kin } from './kin';
-import { severance } from './severance'; 
+import { severance } from './severance';
+import {crimsonRebelion} from './crimsonRebelion'
+import { primalCreed } from './primalCreed';
 
 export const albumsRegistry: AlbumsRegistry = {
   deranged,
@@ -69,7 +71,9 @@ export const albumsRegistry: AlbumsRegistry = {
   theWeightOfAbsence,
   unfinished,
   kin,
-  severance
+  severance,
+  crimsonRebelion,
+  primalCreed
 };
 
 export * from './types';
