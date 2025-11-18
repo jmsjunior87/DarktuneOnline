@@ -34,8 +34,14 @@ import { theWeightOfAbsence } from './theWeightOfAbsence';
 import { unfinished } from './unfinished';
 import { kin } from './kin';
 import { severance } from './severance';
-import {crimsonRebelion} from './crimsonRebelion'
+import { crimsonRebelion } from './crimsonRebelion'
 import { primalCreed } from './primalCreed';
+import { porcelainRot } from './porcelainRot';
+import { bleakness } from './bleakness';
+import { saintOfNone} from './saintOfNone';
+import { legionsOfDecay } from './legionsOfDecay';
+import { cacophonyOfFlesh } from './cacophonyOfFlesh';
+import { gravebornGlory } from './gravebornGlory';
 
 export const albumsRegistry: AlbumsRegistry = {
   deranged,
@@ -73,8 +79,15 @@ export const albumsRegistry: AlbumsRegistry = {
   kin,
   severance,
   crimsonRebelion,
-  primalCreed
+  primalCreed,
+  porcelainRot,
+  bleakness,
+  saintOfNone,
+  legionsOfDecay,
+  cacophonyOfFlesh,
+  gravebornGlory,
 };
+
 
 export * from './types';
 export const getAllAlbums = () => Object.values(albumsRegistry);
