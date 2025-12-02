@@ -42,6 +42,9 @@ import { saintOfNone} from './saintOfNone';
 import { legionsOfDecay } from './legionsOfDecay';
 import { cacophonyOfFlesh } from './cacophonyOfFlesh';
 import { gravebornGlory } from './gravebornGlory';
+import { bloodwindExiles } from './bloodwindExiles';
+import { theMorgueShift } from './theMorgueShift';
+
 
 export const albumsRegistry: AlbumsRegistry = {
   deranged,
@@ -86,6 +89,8 @@ export const albumsRegistry: AlbumsRegistry = {
   legionsOfDecay,
   cacophonyOfFlesh,
   gravebornGlory,
+  bloodwindExiles,
+  theMorgueShift,
 };
 
 
